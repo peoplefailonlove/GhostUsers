@@ -1,4 +1,3 @@
-
 # Document Parser & Audience Generator API
 
 A FastAPI service that provides two main functionalities:
@@ -222,5 +221,3 @@ Returns the health status of the service.
 | `/generate_audience` | POST | Generate synthetic audience characteristics |
 
 | `/health` | GET | Health check endpoint |
-
-| `/docs` | GET | Swagger UI documentation |
