@@ -13,6 +13,7 @@ Required environment variables:
 - AZURE_OPENAI_API_VERSION (e.g. 2024-08-01-preview)
 - AZURE_OPENAI_EMBEDDING_DEPLOYMENT (deployment name for your embedding model)
 """
+# persona_similarity_check
 
 import argparse
 import json
