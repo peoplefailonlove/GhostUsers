@@ -10,3 +10,5 @@ logs/
 .gitignore
 .DS_Store
 .vscode
+tests
+.env_working
