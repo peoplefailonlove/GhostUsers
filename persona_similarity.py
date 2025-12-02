@@ -3,14 +3,12 @@ Compute dot products between a parent persona and each generated child persona
 using Azure OpenAI text embeddings.
 
 Usage:
-    python persona_similarity.py \
-        --parent data/parent_persona.json \
-        --children data/child_personas.json
+    python persona_similarity.py  # reads data/parent_persona.json and data/child_personas.json
 
 Required environment variables:
 - AZURE_OPENAI_ENDPOINT
 - AZURE_OPENAI_API_KEY
-- AZURE_OPENAI_API_VERSION (e.g. 2024-08-01-preview)
+- OPENAI_API_VERSION (e.g. 2024-08-01-preview)
 - AZURE_OPENAI_EMBEDDING_DEPLOYMENT (deployment name for your embedding model)
 """
 # persona_similarity_check
@@ -31,14 +29,14 @@ def make_azure_client() -> AzureOpenAI:
 
     endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
     api_key = os.getenv("AZURE_OPENAI_API_KEY")
-    api_version = os.getenv("AZURE_OPENAI_API_VERSION")
+    api_version = os.getenv("OPENAI_API_VERSION")
 
     missing = [
         name
         for name, val in [
             ("AZURE_OPENAI_ENDPOINT", endpoint),
             ("AZURE_OPENAI_API_KEY", api_key),
-            ("AZURE_OPENAI_API_VERSION", api_version),
+            ("OPENAI_API_VERSION", api_version),
         ]
         if not val
     ]
@@ -124,13 +122,6 @@ def compute_similarities(parent_path: Path, children_path: Path) -> None:
             child_embedding = np.array(embed_text(client, child_text))
             dot_product = float(np.dot(parent_embedding, child_embedding))
             print(f"  {member_id}: dot_product={dot_product:.6f}")
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Compute dot products between parent and child personas.")
-    parser.add_argument("--parent", required=True, type=Path, help="Path to parent_persona.json")
-    parser.add_argument("--children", required=True, type=Path, help="Path to child_personas.json")
-    return parser.parse_args()
 
 
 if __name__ == "__main__":
