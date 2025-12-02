@@ -6,3 +6,6 @@ __pycache__/
 .vscode/
 outputs/
 logs/
+.github
+.gitignore
+.DS_Store
