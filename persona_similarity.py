@@ -15,7 +15,6 @@ Required environment variables:
 """
 # persona_similarity_check
 
-import argparse
 import json
 import os
 from pathlib import Path
@@ -135,5 +134,6 @@ def parse_args() -> argparse.Namespace:
 
 
 if __name__ == "__main__":
-    args = parse_args()
-    compute_similarities(args.parent, args.children)
+    default_parent = Path("data/parent_persona.json")
+    default_children = Path("data/child_personas.json")
+    compute_similarities(default_parent, default_children)
