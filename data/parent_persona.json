@@ -1,0 +1,158 @@
+{
+  "projectName": "Concept Test A",
+  "projectDescription": "Testing moisturizers",
+  "userId": 1,
+  "projectId": 1,
+  "audiences": [
+    {
+      "hasQuota": true,
+      "sampleSize": 250,
+      "variables": [
+        {
+          "variableName": "Age Group",
+          "selectedOption": "Old Millennials (36-45)",
+          "breakdown": {
+            "male": 100,
+            "female": 140
+          }
+        },
+        {
+          "variableName": "Income",
+          "breakdown": {
+            "<50k": 40,
+            ">50k": 100
+          }
+        },
+        {
+          "variableName": "Employees in company",
+          "breakdown": {
+            "1-100": 40,
+            "100-500": 220,
+            "500-1000": 700,
+            "1000-10000": 0
+          }
+        },
+        {
+          "variableName": "Job Title",
+          "breakdown": {
+            "C-Level": 3,
+            "VP": 5,
+            "Director": 7,
+            "Supervisor": 12,
+            "Manager": 0,
+            "Associate": 0
+          }
+        }
+      ],
+      "screenerQuestions": [
+        {
+          "question": "Which of the following best describes your employment status?",
+          "answer": "Employed full-time (30 hours per week or more)"
+        },
+        {
+          "question": "Including yourself, approximately how many full-time equivalent staff does your business employ across all locations in the US?",
+          "answer": "2 to 4 employees"
+        },
+        {
+          "question": "What was the total revenue of your business in 2024 across all locations in the US?",
+          "answer": "$100 million to under $250 million"
+        }
+      ],
+      "persona": {
+        "id": 152,
+        "generatedTitle": "Mr. YouTube: Urban YouTuber on the Rise",
+        "personaName": "Ritvik Kapoor",
+        "age": 23,
+        "location": "Bandra, Mumbai",
+        "ethnicity": "Indian",
+        "gender": "Male",
+        "personaType": "Urban Gen Z Content Creator",
+        "about": "Ritvik Kapoor, a 23-year-old Gen Z YouTuber, is carving out a niche as a content creator focusing on the vibrant city life of Mumbai. With primary education as his academic background, he has leaned heavily on his creativity and adventurous spirit to make his mark. Ritvik resides in Bandra, a culturally rich suburb of Mumbai known for its blend of urban and coastal lifestyles. Despite his minimalist approach to life, he’s deeply invested in creating stories that resonate with urban audiences. Ritvik earns around ₹750,000 to ₹990,000 annually through YouTube partnerships and collaborations, reflecting his growing influence as an early adopter in the digital content space.",
+        "goalsAndMotivations": "To create impactful content that portrays authentic urban life experiences, To gain a loyal subscriber base that values creativity and storytelling, To explore sustainable living and integrate these themes into his YouTube content, To become a recognized and monetarily stable content creator while staying true to his minimalist lifestyle.",
+        "frustrations": "The competitive nature of YouTube and the challenge of standing out, Balancing creative independence with monetization, Limited time and resources for professional gear, Navigating algorithm changes affecting video visibility.",
+        "needState": "Expressive and ambitious",
+        "occasions": "Consumes competitor content to stay updated or creates and uploads content on weekdays and weekends",
+        "image": "https://blobvirtualpersona.blob.core.windows.net/personaimgs/persona_4849738e-8971-435c-878c-27481099d2c4_20250925103734.png",
+        "userId": 15,
+        "createdAt": "2025-09-25T16:08:28.63016",
+        "requestParams": null
+      }
+    },
+    {
+      "hasQuota": true,
+      "sampleSize": 100,
+      "variables": [
+        {
+          "variableName": "Age Group",
+          "selectedOption": "Old Millennials (36-45)",
+          "breakdown": {
+            "male": 100,
+            "female": 140
+          }
+        },
+        {
+          "variableName": "Income",
+          "breakdown": {
+            "<50k": 40,
+            ">50k": 100
+          }
+        },
+        {
+          "variableName": "Employees in company",
+          "breakdown": {
+            "1-100": 40,
+            "100-500": 220,
+            "500-1000": 700,
+            "1000-10000": 0
+          }
+        },
+        {
+          "variableName": "Job Title",
+          "breakdown": {
+            "C-Level": 3,
+            "VP": 5,
+            "Director": 7,
+            "Supervisor": 12,
+            "Manager": 0,
+            "Associate": 0
+          }
+        }
+      ],
+      "screenerQuestions": [
+        {
+          "question": "Which of the following best describes your employment status?",
+          "answer": "Employed full-time (30 hours per week or more)"
+        },
+        {
+          "question": "Including yourself, approximately how many full-time equivalent staff does your business employ across all locations in the US?",
+          "answer": "2 to 4 employees"
+        },
+        {
+          "question": "What was the total revenue of your business in 2024 across all locations in the US?",
+          "answer": "$100 million to under $250 million"
+        }
+      ],
+      "persona": {
+        "id": 153,
+        "generatedTitle": "Mr. YouTube: Urban YouTuber on the Rise",
+        "personaName": "Ritvik Kapoor",
+        "age": 23,
+        "location": "Bandra, Mumbai",
+        "ethnicity": "Indian",
+        "gender": "Male",
+        "personaType": "Urban Gen Z Content Creator",
+        "about": "Ritvik Kapoor, a 23-year-old Gen Z YouTuber, is carving out a niche as a content creator focusing on the vibrant city life of Mumbai. With primary education as his academic background, he has leaned heavily on his creativity and adventurous spirit to make his mark. Ritvik resides in Bandra, a culturally rich suburb of Mumbai known for its blend of urban and coastal lifestyles. Despite his minimalist approach to life, he’s deeply invested in creating stories that resonate with urban audiences. Ritvik earns around ₹750,000 to ₹990,000 annually through YouTube partnerships and collaborations, reflecting his growing influence as an early adopter in the digital content space.",
+        "goalsAndMotivations": "To create impactful content that portrays authentic urban life experiences, To gain a loyal subscriber base that values creativity and storytelling, To explore sustainable living and integrate these themes into his YouTube content, To become a recognized and monetarily stable content creator while staying true to his minimalist lifestyle.",
+        "frustrations": "The competitive nature of YouTube and the challenge of standing out, Balancing creative independence with monetization, Limited time and resources for professional gear, Navigating algorithm changes affecting video visibility.",
+        "needState": "Expressive and ambitious",
+        "occasions": "Consumes competitor content to stay updated or creates and uploads content on weekdays and weekends",
+        "image": "https://blobvirtualpersona.blob.core.windows.net/personaimgs/persona_4849738e-8971-435c-878c-27481099d2c4_20250925103734.png",
+        "userId": 15,
+        "createdAt": "2025-09-25T16:08:28.63016",
+        "requestParams": null
+      }
+    }
+  ],
+  "json_file_url": "/mnt/data/592510c4-12d8-4782-b5fd-ab9ae5cb9e0b.png",
+  "requestId": "REQ-2-1763632735916"
+}
