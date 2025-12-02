@@ -30,12 +30,6 @@ LOG_LEVEL=INFO
 
 ### Start the server (development):
 
-fastapi run app.py
-
-Open the interactive **API** docs (Swagger):
-
-[http://localhost:**8000**/docs](http://localhost:**8000**/docs)
-
 ### Example Request
 
 **POST** /process
