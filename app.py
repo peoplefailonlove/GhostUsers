@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
+import requests
 from fastapi import FastAPI, HTTPException, status, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -95,6 +96,10 @@ app.add_middleware(TrailingSlashMiddleware)
 
 # Constants for audience generation
 AUDIENCE_OUTPUT_CONTAINER = "generated-synthetic-audience"
+UPDATE_PERSONAS_API_URL = os.getenv(
+    "UPDATE_PERSONAS_API_URL",
+    "https://sample-agument-middleware-dev.azurewebsites.net/sample-enrichment/api/projects/update-persona-file-url",
+)
 
 
 # ============== Request/Response Models ==============
@@ -365,6 +370,9 @@ def process_file(req: ProcessRequest):
 
 
 @app.get("/health", response_model=HealthResponse, tags=["Health"])
+@app.get(
+    "/health/", include_in_schema=False
+)  # Supports both, hides duplicate from docs
 async def health_check() -> HealthResponse:
     """Health check endpoint."""
     return HealthResponse(
@@ -377,6 +385,35 @@ async def health_check() -> HealthResponse:
 # ============== Audience Generation Helpers ==============
 
 
+def call_update_personas_api(project_id: int, sas_url: str) -> bool:
+    """
+    Call the update personas API to update the database with generated personas.
+
+    Args:
+        project_id: The project ID to update
+        sas_url: The SAS URL of the generated audience blob
+
+    Returns:
+        True if successful, False otherwise
+    """
+    payload = {"projectId": project_id, "sasUrl": sas_url}
+
+    try:
+        logger.info(f"Calling update personas API for project {project_id}")
+        response = requests.post(
+            UPDATE_PERSONAS_API_URL,
+            json=payload,
+            headers={"Content-Type": "application/json"},
+            timeout=60,
+        )
+        response.raise_for_status()
+        logger.info(f"Successfully updated personas for project {project_id}")
+        return True
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Failed to call update personas API: {e}")
+        return False
+
+
 def process_audience_generation_background(
     task_id: str,
     req: GenerateAudienceRequest,
@@ -385,7 +422,7 @@ def process_audience_generation_background(
     account_key: str,
 ) -> None:
     """
-    Background task to process audience generation.
+    Background task to process audience generation and call update personas API.
 
     Args:
         task_id: Unique task identifier
@@ -536,6 +573,14 @@ def process_audience_generation_background(
             logger.error(f"Task {task_id}: Failed to generate SAS URL: {e}")
             return
 
+        # Call update personas API if projectId is provided
+        if project_id is not None:
+            call_update_personas_api(int(project_id), output_url)
+        else:
+            logger.warning(
+                f"Task {task_id}: No projectId provided, skipping update personas API call"
+            )
+
         # Print completion summary
         logger.info(
             f"\n{'='*60}\n"
@@ -565,7 +610,7 @@ def process_audience_generation_background(
     response_model=GenerateAudienceAsyncResponse,
     tags=["Audience Generation"],
     summary="Generate audience characteristics from JSON data (async)",
-    description="Accepts JSON data, returns task_id immediately, and processes in background.",
+    description="Accepts JSON data, returns task_id immediately, processes in background, and calls update-personas API when complete.",
 )
 @app.post(
     "/generate_audience",
@@ -584,6 +629,7 @@ async def generate_audience(
     - Returns task_id and status immediately
     - Processes audiences in background using Azure OpenAI
     - Uploads output to 'generated-synthetic-audience' container
+    - Calls update-personas API with projectId and sasUrl when complete
     """
     task_id = str(uuid4())
     logger.info(f"Received audience generation request, task_id: {task_id}")

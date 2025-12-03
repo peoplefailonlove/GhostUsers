@@ -180,6 +180,57 @@ Generate synthetic audience characteristics from a JSON file containing persona 
 
 ---
 
+## curl -X POST "http://localhost:8000/generate_audience"
+
+    -H "Content-Type: application/json"
+    -d '{
+  "input_data": {
+    "projectId": 41,
+    "projectName": "Mumbai Millennials Study",
+    "userId": 1,
+    "requestId": "REQ-2025-001",
+    "json_file_url": "https://storage.blob.core.windows.net/files/project41.json",
+    "audiences": [
+      {
+        "sampleSize": 5,
+        "persona": {
+          "personaName": "Ritvik Kapoor",
+          "age": 23,
+          "gender": "Male",
+          "location": "Bandra, Mumbai"
+        },
+        "screenerQuestions": [
+          {
+            "question": "Which of the following best describes your employment status?",
+            "answer": "Employed full-time"
+          },
+          {
+            "question": "Do you use ride-sharing apps like Uber or Ola?",
+            "answer": "Yes"
+          }
+        ]
+      },
+      {
+        "sampleSize": 3,
+        "persona": {
+          "personaName": "Priya Sharma",
+          "age": 29,
+          "gender": "Female",
+          "location": "Delhi"
+        },
+        "screenerQuestions": [
+          {
+            "question": "Do you own a car?",
+            "answer": "No"
+          }
+        ]
+      }
+    ]
+  },
+  "output_blob_prefix": "synthetic_audience_dec2025",
+  "max_concurrent": 10
+}'
+
 ## Endpoint 3: Health Check
 
 ### GET /health
@@ -189,6 +240,11 @@ Returns the health status of the service.
 **Response:**
 
 ```json
+
+
+
+
+
 
 {
 
@@ -201,17 +257,3 @@ Returns the health status of the service.
 }
 
 ```
-
----
-
-## API Endpoints Summary
-
-| Endpoint | Method | Description |
-
-|----------|--------|-------------|
-
-| `/process` | POST | Extract survey questions from DOCX/PDF documents |
-
-| `/generate_audience` | POST | Generate synthetic audience characteristics |
-
-| `/health` | GET | Health check endpoint |
