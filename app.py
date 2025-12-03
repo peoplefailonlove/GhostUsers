@@ -98,7 +98,7 @@ app.add_middleware(TrailingSlashMiddleware)
 AUDIENCE_OUTPUT_CONTAINER = "generated-synthetic-audience"
 UPDATE_PERSONAS_API_URL = os.getenv(
     "UPDATE_PERSONAS_API_URL",
-    "https://sample-agument-middleware-dev.azurewebsites.net/sample-enrichment/api/projects/update-persona-file-url",
+    "",
 )
 
 
@@ -387,30 +387,47 @@ async def health_check() -> HealthResponse:
 
 def call_update_personas_api(project_id: int, sas_url: str) -> bool:
     """
-    Call the update personas API to update the database with generated personas.
-
-    Args:
-        project_id: The project ID to update
-        sas_url: The SAS URL of the generated audience blob
-
-    Returns:
-        True if successful, False otherwise
+    Calls the update-personas API and returns True only if JSON response has "status": "success"
     """
     payload = {"projectId": project_id, "sasUrl": sas_url}
 
     try:
-        logger.info(f"Calling update personas API for project {project_id}")
+        logger.info(f"Calling update-personas API → project {project_id}")
+
         response = requests.post(
             UPDATE_PERSONAS_API_URL,
             json=payload,
             headers={"Content-Type": "application/json"},
             timeout=60,
         )
+
+        # 1. Check HTTP status first
         response.raise_for_status()
-        logger.info(f"Successfully updated personas for project {project_id}")
-        return True
+
+        # 2. Parse JSON body
+        data = response.json()
+
+        # 3. Check the actual business status
+        api_status = data.get("status", "").lower()
+
+        if api_status == "success":
+            logger.info(f"Persona update SUCCESS for project {project_id}")
+            return True
+        else:
+            logger.error(
+                f"Persona update FAILED for project {project_id} | "
+                f"API response: {data}"
+            )
+            return False
+
     except requests.exceptions.RequestException as e:
-        logger.error(f"Failed to call update personas API: {e}")
+        logger.error(f"HTTP error calling update-personas API (project {project_id}): {e}")
+        if hasattr(e, "response") and e.response is not None:
+            logger.error(f"Response body: {e.response.text}")
+        return False
+    except (ValueError, KeyError, TypeError) as e:
+        logger.error(f"Invalid JSON response from update-personas API (project {project_id}): {e}")
+        logger.error(f"Raw response: {response.text if 'response' in locals() else 'N/A'}")
         return False
 
 
