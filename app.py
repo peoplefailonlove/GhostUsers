@@ -52,6 +52,13 @@ except Exception as e:
         f"Failed to import from generate_audience_characteristics.py: {e}"
     )
 
+try:
+    from run_survey import run_survey_for_all_members
+except Exception as e:
+    raise ImportError(
+        f"Failed to import run_survey_for_all_members from run_survey.py: {e}"
+    )
+
 # Load .env
 load_dotenv()
 
@@ -96,6 +103,8 @@ app.add_middleware(TrailingSlashMiddleware)
 
 # Constants for audience generation
 AUDIENCE_OUTPUT_CONTAINER = "generated-synthetic-audience"
+# Container for survey simulation output
+SURVEY_RESULTS_CONTAINER = "survey-answer"
 UPDATE_PERSONAS_API_URL = os.getenv(
     "UPDATE_PERSONAS_API_URL",
     "",
@@ -149,6 +158,27 @@ class HealthResponse(BaseModel):
     status: str
     service: str
     version: str
+
+
+# Survey Simulation request/response models
+class RunSurveyRequest(BaseModel):
+    """Request body for survey simulation."""
+
+    questionnaire_blob_url: str
+    audience_blob_url: str
+    output_blob_prefix: str = "survey_llm_results"
+    task_id: str | None = None  # Task ID from generate_audience for correlation
+
+
+class RunSurveyResponse(BaseModel):
+    """Response body for survey simulation."""
+
+    status: str
+    output_blob: str
+    total_members: int
+    total_questions: int
+    processing_time_seconds: float
+    task_id: str | None = None  # Echoed back for correlation
 
 
 # Helper: parse container + blob name from full blob URL
@@ -364,6 +394,172 @@ def process_file(req: ProcessRequest):
         if tmp_dir and os.path.exists(tmp_dir):
             shutil.rmtree(tmp_dir, ignore_errors=True)
             logger.info("Temporary folder cleaned up")
+
+
+# ============== Survey Simulation Endpoint ==============
+
+
+@app.post("/simulate-survey", response_model=RunSurveyResponse, tags=["Survey"])
+@app.post("/simulate-survey/", include_in_schema=False)
+def simulate_survey(req: RunSurveyRequest) -> RunSurveyResponse:
+    """
+    Run LLM-based survey simulation for all personas in the given audience JSON.
+
+    - Downloads questionnaire and audience JSON from blob URLs.
+    - Runs LLM to answer all non-screener questions for each persona.
+    - Uploads results JSON into the `survey-answer` container.
+    - Returns a SAS URL for the output blob plus basic stats.
+    """
+    logger.info(
+        f"simulate-survey: questionnaire_blob_url={req.questionnaire_blob_url}, "
+        f"audience_blob_url={req.audience_blob_url}, "
+        f"task_id={req.task_id}"
+    )
+
+    conn_str = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+    if not conn_str:
+        raise HTTPException(
+            status_code=500,
+            detail="AZURE_STORAGE_CONNECTION_STRING not set",
+        )
+
+    account_name, account_key = parse_account_from_connection_string(conn_str)
+    if not account_name or not account_key:
+        logger.error(
+            "AccountName or AccountKey missing in AZURE_STORAGE_CONNECTION_STRING. "
+            "SAS URL generation requires a connection string with AccountKey."
+        )
+        raise HTTPException(
+            status_code=500,
+            detail="AccountName or AccountKey missing in AZURE_STORAGE_CONNECTION_STRING (cannot generate SAS).",
+        )
+
+    try:
+        blob_service = BlobServiceClient.from_connection_string(conn_str)
+    except Exception as e:
+        logger.exception("Failed to create BlobServiceClient")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create BlobServiceClient: {e}",
+        )
+
+    # Parse input blob URLs
+    try:
+        q_container, q_blob_name = parse_blob_url(req.questionnaire_blob_url)
+        a_container, a_blob_name = parse_blob_url(req.audience_blob_url)
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid input blob URL: {e}",
+        )
+
+    tmp_dir = tempfile.mkdtemp(prefix="survey_run_")
+    try:
+        # ---------- Download questionnaire JSON ----------
+        questionnaire_local = os.path.join(tmp_dir, "questionnaire.json")
+        try:
+            q_blob_client = blob_service.get_blob_client(
+                container=q_container,
+                blob=q_blob_name,
+            )
+            data = q_blob_client.download_blob().readall()
+            with open(questionnaire_local, "wb") as f:
+                f.write(data)
+        except Exception as e:
+            logger.exception("Failed to download questionnaire blob")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to download questionnaire blob: {e}",
+            )
+
+        # ---------- Download audience/persona JSON ----------
+        audience_local = os.path.join(tmp_dir, "audience.json")
+        try:
+            a_blob_client = blob_service.get_blob_client(
+                container=a_container,
+                blob=a_blob_name,
+            )
+            data = a_blob_client.download_blob().readall()
+            with open(audience_local, "wb") as f:
+                f.write(data)
+        except Exception as e:
+            logger.exception("Failed to download audience blob")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to download audience blob: {e}",
+            )
+
+        # ---------- Run survey simulation ----------
+        start_time = time.time()
+        results = run_survey_for_all_members(
+            questionnaire_path=questionnaire_local,
+            project_path=audience_local,
+            batch_size=30,
+        )
+        processing_seconds = time.time() - start_time
+
+        total_members = len(results)
+        total_questions = len(results[0]["answers"]) if results else 0
+
+        # ---------- Save results locally ----------
+        output_blob_name = generate_output_blob_name(req.output_blob_prefix)
+        local_output_path = os.path.join(tmp_dir, output_blob_name)
+        with open(local_output_path, "w", encoding="utf-8") as f:
+            json.dump(results, f, ensure_ascii=False, indent=2)
+
+        # ---------- Upload results to survey-answer container ----------
+        try:
+            output_blob_client = blob_service.get_blob_client(
+                container=SURVEY_RESULTS_CONTAINER,
+                blob=output_blob_name,
+            )
+            with open(local_output_path, "rb") as f:
+                output_blob_client.upload_blob(
+                    f,
+                    overwrite=True,
+                    content_settings=ContentSettings(content_type="application/json"),
+                )
+        except Exception as e:
+            logger.exception("Failed to upload survey results JSON")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to upload survey results JSON: {e}",
+            )
+
+        # ---------- Generate SAS URL ----------
+        try:
+            sas_token = generate_blob_sas(
+                account_name=account_name,
+                container_name=SURVEY_RESULTS_CONTAINER,
+                blob_name=output_blob_name,
+                account_key=account_key,
+                permission=BlobSasPermissions(read=True),
+                expiry=datetime.utcnow() + timedelta(days=365),
+            )
+            if not sas_token:
+                raise RuntimeError("generate_blob_sas returned empty token")
+
+            output_url = f"{output_blob_client.url}?{sas_token}"
+        except Exception as e:
+            logger.exception("Failed to generate SAS URL for survey results")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to generate SAS URL: {e}",
+            )
+
+        return RunSurveyResponse(
+            status="success",
+            output_blob=output_url,
+            total_members=total_members,
+            total_questions=total_questions,
+            processing_time_seconds=processing_seconds,
+            task_id=req.task_id,
+        )
+
+    finally:
+        if os.path.exists(tmp_dir):
+            shutil.rmtree(tmp_dir, ignore_errors=True)
+            logger.info("Temporary folder for survey_run cleaned up")
 
 
 # ============== Health Check Endpoint ==============

@@ -14,5 +14,5 @@ tests
 .env_working
 notebooks
 Dockerfile
-merged code
 data
+merged code
