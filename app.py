@@ -1022,6 +1022,8 @@ def process_audience_generation_background(
                     f"  total_questions: {survey_result.get('total_questions')}"
                 )
                 
+                # TODO: Vaibhav has to insert his code here
+                
                 # Call update-survey-file-url API after successful survey completion
                 if survey_output_url and project_id is not None:
                     survey_update_success = call_update_survey_api(
@@ -1034,6 +1036,7 @@ def process_audience_generation_background(
                         logger.info(
                             f"Task {task_id}: update-survey-file-url API call succeeded"
                         )
+                        
                     else:
                         logger.warning(
                             f"Task {task_id}: update-survey-file-url API call failed"
