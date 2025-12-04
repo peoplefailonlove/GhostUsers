@@ -396,6 +396,141 @@ def process_file(req: ProcessRequest):
             logger.info("Temporary folder cleaned up")
 
 
+# ============== Survey Simulation Helpers ==============
+
+
+def _run_simulate_survey_internal(
+    questionnaire_blob_url: str,
+    audience_blob_url: str,
+    output_blob_prefix: str,
+    task_id: str,
+    conn_str: str,
+    account_name: str,
+    account_key: str,
+) -> dict:
+    """
+    Internal function to run survey simulation. Can be called from background tasks.
+    
+    Returns a dict with keys: status, output_blob, total_members, total_questions, 
+    processing_time_seconds, task_id
+    
+    Raises Exception on failure.
+    """
+    logger.info(
+        f"_run_simulate_survey_internal: questionnaire={questionnaire_blob_url}, "
+        f"audience={audience_blob_url}, task_id={task_id}"
+    )
+
+    try:
+        blob_service = BlobServiceClient.from_connection_string(conn_str)
+    except Exception as e:
+        logger.exception("Failed to create BlobServiceClient")
+        raise RuntimeError(f"Failed to create BlobServiceClient: {e}")
+
+    # Parse input blob URLs
+    try:
+        q_container, q_blob_name = parse_blob_url(questionnaire_blob_url)
+        a_container, a_blob_name = parse_blob_url(audience_blob_url)
+    except Exception as e:
+        raise ValueError(f"Invalid input blob URL: {e}")
+
+    tmp_dir = tempfile.mkdtemp(prefix="survey_run_internal_")
+    try:
+        # ---------- Download questionnaire JSON ----------
+        questionnaire_local = os.path.join(tmp_dir, "questionnaire.json")
+        try:
+            q_blob_client = blob_service.get_blob_client(
+                container=q_container,
+                blob=q_blob_name,
+            )
+            data = q_blob_client.download_blob().readall()
+            with open(questionnaire_local, "wb") as f:
+                f.write(data)
+        except Exception as e:
+            logger.exception("Failed to download questionnaire blob")
+            raise RuntimeError(f"Failed to download questionnaire blob: {e}")
+
+        # ---------- Download audience/persona JSON ----------
+        audience_local = os.path.join(tmp_dir, "audience.json")
+        try:
+            a_blob_client = blob_service.get_blob_client(
+                container=a_container,
+                blob=a_blob_name,
+            )
+            data = a_blob_client.download_blob().readall()
+            with open(audience_local, "wb") as f:
+                f.write(data)
+        except Exception as e:
+            logger.exception("Failed to download audience blob")
+            raise RuntimeError(f"Failed to download audience blob: {e}")
+
+        # ---------- Run survey simulation ----------
+        start_time = time.time()
+        results = run_survey_for_all_members(
+            questionnaire_path=questionnaire_local,
+            project_path=audience_local,
+            batch_size=30,
+        )
+        processing_seconds = time.time() - start_time
+
+        total_members = len(results)
+        total_questions = len(results[0]["answers"]) if results else 0
+
+        # ---------- Save results locally ----------
+        output_blob_name = generate_output_blob_name(output_blob_prefix)
+        local_output_path = os.path.join(tmp_dir, output_blob_name)
+        with open(local_output_path, "w", encoding="utf-8") as f:
+            json.dump(results, f, ensure_ascii=False, indent=2)
+
+        # ---------- Upload results to survey-answer container ----------
+        try:
+            output_blob_client = blob_service.get_blob_client(
+                container=SURVEY_RESULTS_CONTAINER,
+                blob=output_blob_name,
+            )
+            with open(local_output_path, "rb") as f:
+                output_blob_client.upload_blob(
+                    f,
+                    overwrite=True,
+                    content_settings=ContentSettings(content_type="application/json"),
+                )
+        except Exception as e:
+            logger.exception("Failed to upload survey results JSON")
+            raise RuntimeError(f"Failed to upload survey results JSON: {e}")
+
+        # ---------- Generate SAS URL ----------
+        try:
+            sas_token = generate_blob_sas(
+                account_name=account_name,
+                container_name=SURVEY_RESULTS_CONTAINER,
+                blob_name=output_blob_name,
+                account_key=account_key,
+                permission=BlobSasPermissions(read=True),
+                expiry=datetime.utcnow() + timedelta(days=365),
+            )
+            if not sas_token:
+                raise RuntimeError("generate_blob_sas returned empty token")
+
+            output_url = f"{output_blob_client.url}?{sas_token}"
+        except Exception as e:
+            logger.exception("Failed to generate SAS URL for survey results")
+            raise RuntimeError(f"Failed to generate SAS URL: {e}")
+
+        return {
+            "status": "success",
+            "output_blob": output_url,
+            "total_members": total_members,
+            "total_questions": total_questions,
+            "processing_time_seconds": processing_seconds,
+            "task_id": task_id,
+        }
+
+    finally:
+        if os.path.exists(tmp_dir):
+            shutil.rmtree(tmp_dir, ignore_errors=True)
+            logger.info("Temporary folder for survey_run_internal cleaned up")
+
+
 # ============== Survey Simulation Endpoint ==============
 
 
@@ -583,7 +718,8 @@ async def health_check() -> HealthResponse:
 
 def call_update_personas_api(project_id: int, sas_url: str) -> bool:
     """
-    Calls the update-personas API and returns True only if JSON response has "status": "success"
+    Calls the update-personas API and returns True only if JSON response has "status": "success".
+    Returns True on success, False on failure.
     """
     payload = {"projectId": project_id, "sasUrl": sas_url}
 
@@ -787,11 +923,47 @@ def process_audience_generation_background(
             return
 
         # Call update personas API if projectId is provided
+        update_success = False
         if project_id is not None:
-            call_update_personas_api(int(project_id), output_url)
+            update_success = call_update_personas_api(int(project_id), output_url)
         else:
             logger.warning(
                 f"Task {task_id}: No projectId provided, skipping update personas API call"
+            )
+
+        # Chain simulate-survey after successful update_personas_api call
+        if update_success and json_file_url:
+            logger.info(
+                f"Task {task_id}: update_personas_api succeeded, chaining simulate-survey"
+            )
+            try:
+                survey_result = _run_simulate_survey_internal(
+                    questionnaire_blob_url=json_file_url,
+                    audience_blob_url=output_url,
+                    output_blob_prefix="survey_results",
+                    task_id=task_id,
+                    conn_str=conn_str,
+                    account_name=account_name,
+                    account_key=account_key,
+                )
+                logger.info(
+                    f"Task {task_id}: simulate-survey completed successfully\n"
+                    f"  survey_output_blob: {survey_result.get('output_blob')}\n"
+                    f"  total_members: {survey_result.get('total_members')}\n"
+                    f"  total_questions: {survey_result.get('total_questions')}"
+                )
+            except Exception as survey_err:
+                logger.error(
+                    f"Task {task_id}: simulate-survey failed: {survey_err}"
+                )
+        elif update_success and not json_file_url:
+            logger.warning(
+                f"Task {task_id}: update_personas_api succeeded but no json_file_url provided, "
+                "skipping simulate-survey"
+            )
+        elif not update_success:
+            logger.warning(
+                f"Task {task_id}: update_personas_api failed, skipping simulate-survey"
             )
 
         # Print completion summary
