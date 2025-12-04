@@ -109,6 +109,10 @@ UPDATE_PERSONAS_API_URL = os.getenv(
     "UPDATE_PERSONAS_API_URL",
     "",
 )
+UPDATE_SURVEY_API_URL = os.getenv(
+    "UPDATE_SURVEY_API_URL",
+    "",
+)
 
 
 # ============== Request/Response Models ==============
@@ -716,6 +720,70 @@ async def health_check() -> HealthResponse:
 # ============== Audience Generation Helpers ==============
 
 
+def call_update_survey_api(
+    project_id: int, task_id: str, survey_file_url: str, status_text: str = "Survey File Generated"
+) -> bool:
+    """
+    Calls the update-survey-file-url API after survey is completed and uploaded to blob.
+    Returns True on success, False on failure.
+    
+    API: POST to UPDATE_SURVEY_API_URL
+    Payload: { "projectId": int, "taskId": str, "surveyFileUrl": str, "status": str }
+    """
+    if not UPDATE_SURVEY_API_URL:
+        logger.warning("UPDATE_SURVEY_API_URL not configured, skipping survey update API call")
+        return False
+
+    payload = {
+        "projectId": project_id,
+        "taskId": task_id,
+        "surveyFileUrl": survey_file_url,
+        "status": status_text,
+    }
+
+    try:
+        logger.info(
+            f"Calling update-survey-file-url API → project {project_id}, task {task_id}"
+        )
+
+        response = requests.post(
+            UPDATE_SURVEY_API_URL,
+            json=payload,
+            headers={"Content-Type": "application/json"},
+            timeout=60,
+        )
+
+        response.raise_for_status()
+        data = response.json()
+        api_status = data.get("status", "").lower()
+
+        if api_status == "success":
+            logger.info(
+                f"Survey file URL update SUCCESS for project {project_id}, task {task_id}"
+            )
+            return True
+        else:
+            logger.error(
+                f"Survey file URL update FAILED for project {project_id}, task {task_id} | "
+                f"API response: {data}"
+            )
+            return False
+
+    except requests.exceptions.RequestException as e:
+        logger.error(
+            f"HTTP error calling update-survey-file-url API (project {project_id}, task {task_id}): {e}"
+        )
+        if hasattr(e, "response") and e.response is not None:
+            logger.error(f"Response body: {e.response.text}")
+        return False
+    except (ValueError, KeyError, TypeError) as e:
+        logger.error(
+            f"Invalid JSON response from update-survey-file-url API (project {project_id}, task {task_id}): {e}"
+        )
+        logger.error(f"Raw response: {response.text if 'response' in locals() else 'N/A'}")
+        return False
+
+
 def call_update_personas_api(project_id: int, sas_url: str) -> bool:
     """
     Calls the update-personas API and returns True only if JSON response has "status": "success".
@@ -946,12 +1014,30 @@ def process_audience_generation_background(
                     account_name=account_name,
                     account_key=account_key,
                 )
+                survey_output_url = survey_result.get('output_blob')
                 logger.info(
                     f"Task {task_id}: simulate-survey completed successfully\n"
-                    f"  survey_output_blob: {survey_result.get('output_blob')}\n"
+                    f"  survey_output_blob: {survey_output_url}\n"
                     f"  total_members: {survey_result.get('total_members')}\n"
                     f"  total_questions: {survey_result.get('total_questions')}"
                 )
+                
+                # Call update-survey-file-url API after successful survey completion
+                if survey_output_url and project_id is not None:
+                    survey_update_success = call_update_survey_api(
+                        project_id=int(project_id),
+                        task_id=task_id,
+                        survey_file_url=survey_output_url,
+                        status_text="Survey File Generated",
+                    )
+                    if survey_update_success:
+                        logger.info(
+                            f"Task {task_id}: update-survey-file-url API call succeeded"
+                        )
+                    else:
+                        logger.warning(
+                            f"Task {task_id}: update-survey-file-url API call failed"
+                        )
             except Exception as survey_err:
                 logger.error(
                     f"Task {task_id}: simulate-survey failed: {survey_err}"
@@ -1075,3 +1161,76 @@ async def generate_audience(
         task_id=task_id,
         status="processing",
     )
+
+
+
+
+
+
+
+# """
+# Test script for UPDATE_SURVEY_API_URL endpoint.
+
+# Usage:
+#     python test_update_survey_api.py
+# """
+
+# import os
+# import requests
+# from dotenv import load_dotenv
+
+# load_dotenv()
+
+# UPDATE_SURVEY_API_URL = os.getenv(
+#     "UPDATE_SURVEY_API_URL",
+#     "https://sample-agument-middleware-dev.azurewebsites.net/sample-enrichment/api/projects/update-survey-file-url",
+# )
+
+
+# def test_update_survey_api():
+#     """Test the update-survey-file-url API with sample data."""
+    
+#     payload = {
+#         "projectId": 10,
+#         "taskId": "ABD123",
+#         "surveyFileUrl": "https://storage/doc1.json",
+#         "status": "Survey File Generated",
+#     }
+
+#     print(f"Testing UPDATE_SURVEY_API_URL: {UPDATE_SURVEY_API_URL}")
+#     print(f"Payload: {payload}")
+#     print("-" * 50)
+
+#     try:
+#         response = requests.post(
+#             UPDATE_SURVEY_API_URL,
+#             json=payload,
+#             headers={"Content-Type": "application/json"},
+#             timeout=60,
+#         )
+
+#         print(f"Status Code: {response.status_code}")
+#         print(f"Response Headers: {dict(response.headers)}")
+#         print(f"Response Body: {response.text}")
+#         print("-" * 50)
+
+#         if response.status_code == 200:
+#             data = response.json()
+#             api_status = data.get("status", "").lower()
+#             if api_status == "success":
+#                 print("✅ API call SUCCESS")
+#             else:
+#                 print(f"❌ API returned non-success status: {data}")
+#         else:
+#             print(f"❌ HTTP error: {response.status_code}")
+
+#     except requests.exceptions.RequestException as e:
+#         print(f"❌ Request failed: {e}")
+#         if hasattr(e, "response") and e.response is not None:
+#             print(f"Response body: {e.response.text}")
+#     except Exception as e:
+#         print(f"❌ Unexpected error: {e}")
+
+
+# if __name__ == "__main__":
+#     test_update_survey_api()
