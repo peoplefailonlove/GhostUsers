@@ -119,6 +119,9 @@ def create_generation_prompt(member: dict[str, Any]) -> str:
         for response in screener_responses:
             question = response.get("question", "N/A")
             answer = response.get("answer", "N/A")
+            # Handle answer as list or string
+            if isinstance(answer, list):
+                answer = ", ".join(str(a) for a in answer)
             screener_lines.append(f"- **Q**: {question}\n  **A**: {answer}")
         screener_section = "\n".join(screener_lines)
     else:
