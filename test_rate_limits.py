@@ -1,6 +1,6 @@
 """
 Test script to explore Azure OpenAI rate limits and metrics monitoring.
-Uses LangChain with Azure OpenAI.
+Uses LangChain with Azure OpenAI (no callbacks - uses response metadata).
 
 Run: python test_rate_limits.py
 """
@@ -11,7 +11,6 @@ from datetime import datetime
 from dotenv import load_dotenv
 from langchain_openai import AzureChatOpenAI
 from langchain_core.messages import HumanMessage
-from langchain_community.callbacks import get_openai_callback
 
 load_dotenv()
 
@@ -28,21 +27,26 @@ llm = AzureChatOpenAI(
 
 
 def test_single_call_with_usage():
-    """Test a single call and inspect usage stats using LangChain callback."""
+    """Test a single call and inspect usage stats from response metadata."""
     print("\n" + "=" * 60)
     print("TEST 1: Single Call - Token Usage (LangChain)")
     print("=" * 60)
 
-    # Use get_openai_callback to track token usage
-    with get_openai_callback() as cb:
-        response = llm.invoke([HumanMessage(content="Say hello in 5 words.")])
+    response = llm.invoke([HumanMessage(content="Say hello in 5 words.")])
 
     print(f"\nResponse: {response.content}")
-    print(f"\n📊 Token Usage (via callback):")
-    print(f"   Prompt tokens:     {cb.prompt_tokens}")
-    print(f"   Completion tokens: {cb.completion_tokens}")
-    print(f"   Total tokens:      {cb.total_tokens}")
-    print(f"   Total cost (USD):  ${cb.total_cost:.6f}")
+    
+    # Token usage is in response.response_metadata['token_usage']
+    token_usage = response.response_metadata.get("token_usage", {})
+    print(f"\n📊 Token Usage (from response_metadata):")
+    print(f"   Prompt tokens:     {token_usage.get('prompt_tokens', 'N/A')}")
+    print(f"   Completion tokens: {token_usage.get('completion_tokens', 'N/A')}")
+    print(f"   Total tokens:      {token_usage.get('total_tokens', 'N/A')}")
+    
+    # Show full metadata for discovery
+    print(f"\n📋 Full response_metadata:")
+    for key, value in response.response_metadata.items():
+        print(f"   {key}: {value}")
 
     return response
 
@@ -108,28 +112,37 @@ def test_rate_limit_headers():
 
 
 def test_multiple_calls_tracking():
-    """Make multiple calls and track cumulative usage with LangChain callback."""
+    """Make multiple calls and track cumulative usage from response metadata."""
     print("\n" + "=" * 60)
     print("TEST 3: Multiple Calls - Cumulative Tracking (LangChain)")
     print("=" * 60)
 
     call_count = 5
+    total_prompt_tokens = 0
+    total_completion_tokens = 0
+    
     print(f"\nMaking {call_count} API calls...")
 
-    # Track all calls within a single callback context
-    with get_openai_callback() as cb:
-        for i in range(call_count):
-            start = time.time()
-            response = llm.invoke([HumanMessage(content=f"Count to {i + 1}")])
-            elapsed = time.time() - start
-            print(f"   Call {i + 1}: {elapsed:.2f}s - {response.content[:50]}...")
+    for i in range(call_count):
+        start = time.time()
+        response = llm.invoke([HumanMessage(content=f"Count to {i + 1}")])
+        elapsed = time.time() - start
+        
+        # Get token usage from response metadata
+        token_usage = response.response_metadata.get("token_usage", {})
+        prompt_tokens = token_usage.get("prompt_tokens", 0)
+        completion_tokens = token_usage.get("completion_tokens", 0)
+        total_tokens = token_usage.get("total_tokens", 0)
+        
+        total_prompt_tokens += prompt_tokens
+        total_completion_tokens += completion_tokens
+        
+        print(f"   Call {i + 1}: {total_tokens} tokens, {elapsed:.2f}s")
 
     print(f"\n📊 Cumulative Usage (all {call_count} calls):")
-    print(f"   Total prompt tokens:     {cb.prompt_tokens}")
-    print(f"   Total completion tokens: {cb.completion_tokens}")
-    print(f"   Total tokens:            {cb.total_tokens}")
-    print(f"   Total cost (USD):        ${cb.total_cost:.6f}")
-    print(f"   Successful requests:     {cb.successful_requests}")
+    print(f"   Total prompt tokens:     {total_prompt_tokens}")
+    print(f"   Total completion tokens: {total_completion_tokens}")
+    print(f"   Grand total:             {total_prompt_tokens + total_completion_tokens}")
 
 
 def test_429_behavior():
@@ -167,9 +180,10 @@ def test_429_behavior():
 
     for i in range(max_calls):
         try:
-            with get_openai_callback() as cb:
-                response = fast_llm.invoke([HumanMessage(content="Hi")])
-            print(f"   Call {i + 1}: ✅ OK | Tokens used: {cb.total_tokens}")
+            response = fast_llm.invoke([HumanMessage(content="Hi")])
+            token_usage = response.response_metadata.get("token_usage", {})
+            total_tokens = token_usage.get("total_tokens", "?")
+            print(f"   Call {i + 1}: ✅ OK | Tokens used: {total_tokens}")
             success_count += 1
 
         except Exception as e:
