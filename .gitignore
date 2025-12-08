@@ -10,3 +10,7 @@ logs/
 .gitignore
 .DS_Store
 .vscode
+trash
+tests
+notebooks
+merged code
