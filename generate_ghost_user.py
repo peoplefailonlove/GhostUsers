@@ -17,6 +17,8 @@ from langchain_openai import AzureChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field, ValidationError
 
+from llm_judge import check_persona
+
 load_dotenv()
 
 PROVIDER_AZURE = "azure"
@@ -147,6 +149,16 @@ Above information is enough to understand persona's traits and behavior. Use the
 
 Generate a complete, realistic audience member profile as JSON."""
 
+    # Add feedback from previous failed validation attempt
+    if member.get("previous_validation_feedback"):
+        feedback = member["previous_validation_feedback"]
+        prompt += f"""
+
+## ⚠️ PREVIOUS ATTEMPT WAS REJECTED
+Reason: {feedback}
+
+Fix this issue. Do NOT make the same mistake again."""
+
     return prompt
 
 
@@ -253,46 +265,133 @@ def _parse_llm_response(
     )
 
 
+class ValidatedMember(BaseModel):
+    """Generated member with validation scores."""
+
+    member_id: str
+    name: str
+    about: str
+    goals_and_motivations: list[str]
+    frustrations: list[str]
+    need_state: str
+    occasions: str
+    screener_score: float
+    parent_score: float
+    validation_passed: bool
+    validation_explanation: str
+    validation_attempt: int  # Which attempt succeeded (1-indexed)
+
+
+# ============================================================================
+# Validation Thresholds (never trust the model's pass/fail)
+# ============================================================================
+
+SCREENER_THRESHOLD = 0.88
+PARENT_THRESHOLD = 0.88
+MAX_VALIDATION_RETRIES = 3
+MAX_GENERATION_ROUNDS = 5  # Max rounds to try filling the sample size
+
+
 async def generate_member(
     client: AzureChatOpenAI,
     deployment: str,
     member: dict[str, Any],
-    max_retries: int = 3,
-) -> GeneratedMember | None:
+) -> tuple[ValidatedMember | None, int]:
     """
-    Generate characteristics for a single audience member.
+    Generate characteristics for a single audience member with smart retry validation.
+
+    Uses LLM judge to validate generated personas. On failure, feeds the rejection
+    reason back into the next generation attempt for self-correction.
 
     Args:
         client: AsyncAzureOpenAI client
         deployment: Azure deployment name
         member: Member data with persona_template and screener_responses
-        max_retries: Number of retries on failure
 
     Returns:
-        GeneratedMember or None if all retries fail
+        Tuple of (ValidatedMember or None, number of attempts used)
     """
-    prompt = create_generation_prompt(member)
     member_id = member.get("member_id", "unknown")
     audience_index = member.get("audience_index", -1)
+    persona_template = member.get("persona_template", {})
+    screener_responses = member.get("screener_responses", [])
 
-    for attempt in range(max_retries):
+    # Create a mutable copy for feedback injection
+    member_state = dict(member)
+
+    for attempt in range(1, MAX_VALIDATION_RETRIES + 1):
         try:
+            # 1. Generate the persona (prompt includes feedback if available)
+            prompt = create_generation_prompt(member_state)
             content = await _call_llm(client, deployment, prompt)
-            return _parse_llm_response(content, member_id, audience_index)
+            generated = _parse_llm_response(content, member_id, audience_index)
+
+            # 2. Run LLM judge
+            judgment = await check_persona(
+                persona_template,
+                screener_responses,
+                generated.model_dump()
+            )
+
+            # 3. WE decide pass/fail (never trust the model)
+            screener_score = judgment.get("screener_score", 0.0)
+            parent_score = judgment.get("parent_score", 0.0)
+            passed = (screener_score >= SCREENER_THRESHOLD and 
+                      parent_score >= PARENT_THRESHOLD)
+
+            # 4. Build the result with scores
+            result = ValidatedMember(
+                member_id=generated.member_id,
+                name=generated.name,
+                about=generated.about,
+                goals_and_motivations=generated.goals_and_motivations,
+                frustrations=generated.frustrations,
+                need_state=generated.need_state,
+                occasions=generated.occasions,
+                screener_score=round(screener_score, 3),
+                parent_score=round(parent_score, 3),
+                validation_passed=passed,
+                validation_explanation=judgment.get("explanation", ""),
+                validation_attempt=attempt
+            )
+
+            # 5. If passed → accept and return
+            if passed:
+                print(f"  {member_id}: ✓ PASSED on attempt {attempt} → "
+                      f"screener={screener_score:.3f}, parent={parent_score:.3f}")
+                return result, attempt
+
+            # 6. If failed → log and prepare for retry with feedback
+            print(f"  {member_id}: ✗ FAILED attempt {attempt}/{MAX_VALIDATION_RETRIES} → "
+                  f"{judgment.get('explanation', 'No reason')}")
+
+            if attempt < MAX_VALIDATION_RETRIES:
+                # Inject rejection reason for next generation attempt
+                member_state["previous_validation_feedback"] = judgment.get("explanation", "")
+                await asyncio.sleep(0.3 * attempt)  # Brief backoff
+            else:
+                # Final attempt failed - return with failed flag
+                print(f"  {member_id}: ✗ REJECTED after {MAX_VALIDATION_RETRIES} attempts")
+                return result, attempt
 
         except (json.JSONDecodeError, ValidationError) as e:
-            if attempt < max_retries - 1:
-                await asyncio.sleep(0.5 * (attempt + 1))
+            print(f"  {member_id}: Parse error on attempt {attempt}: {e}")
+            if attempt < MAX_VALIDATION_RETRIES:
+                member_state["previous_validation_feedback"] = f"JSON/validation error: {e}"
+                await asyncio.sleep(0.5 * attempt)
             else:
-                print(f"  Failed {member_id} after {max_retries} attempts: {e}")
+                print(f"  {member_id}: ✗ REJECTED after {MAX_VALIDATION_RETRIES} attempts (parse errors)")
+                return None, attempt
 
         except Exception as e:
-            if attempt < max_retries - 1:
-                await asyncio.sleep(1)
+            print(f"  {member_id}: API error on attempt {attempt}: {e}")
+            if attempt < MAX_VALIDATION_RETRIES:
+                await asyncio.sleep(1.0 * attempt)
             else:
-                print(f"  API error for {member_id}: {e}")
+                print(f"  {member_id}: ✗ REJECTED after {MAX_VALIDATION_RETRIES} attempts (API errors)")
+                return None, attempt
 
-    return None
+    return None, MAX_VALIDATION_RETRIES
 
 
 def convert_persona_to_template(persona: dict[str, Any]) -> dict[str, Any]:
@@ -358,17 +457,36 @@ def convert_audience_to_members(
 
 
 class ProgressTracker:
-    """Thread-safe progress tracker for parallel generation."""
+    """Thread-safe progress tracker for parallel generation with validation stats."""
 
     def __init__(self, total: int) -> None:
         self.total = total
         self.completed = 0
+        self.passed = 0
+        self.failed = 0
+        self.total_attempts = 0
         self._lock = asyncio.Lock()
 
-    async def increment(self, member_id: str) -> None:
+    async def record(self, member_id: str, passed: bool, attempts: int) -> None:
+        """Record a completed member with its validation result."""
         async with self._lock:
             self.completed += 1
-            print(f"  [{self.completed}/{self.total}] Generated: {member_id}")
+            self.total_attempts += attempts
+            if passed:
+                self.passed += 1
+            else:
+                self.failed += 1
+
+    def get_stats(self) -> dict[str, Any]:
+        """Get current validation statistics."""
+        return {
+            "completed": self.completed,
+            "passed": self.passed,
+            "failed": self.failed,
+            "total_attempts": self.total_attempts,
+            "avg_attempts": round(self.total_attempts / self.completed, 2) if self.completed > 0 else 0,
+            "pass_rate": round((self.passed / self.completed) * 100, 1) if self.completed > 0 else 0,
+        }
 
 
 # ============================================================================
@@ -382,50 +500,56 @@ async def _generate_with_semaphore(
     member: dict[str, Any],
     semaphore: asyncio.Semaphore,
     progress: ProgressTracker,
-) -> GeneratedMember | None:
+) -> ValidatedMember | None:
     """Generate a single member with rate limiting and progress tracking."""
     async with semaphore:
-        result = await generate_member(client, deployment, member)
+        result, attempts = await generate_member(client, deployment, member)
         if result:
-            await progress.increment(result.member_id)
+            await progress.record(result.member_id, result.validation_passed, attempts)
+        else:
+            # Generation completely failed
+            await progress.record(member.get("member_id", "unknown"), False, attempts)
         return result
 
 
-def _build_audience_result(
+def _build_audience_result_from_members(
     audience_data: dict[str, Any],
     audience_index: int,
-    results: list[GeneratedMember | None],
+    members: list[ValidatedMember],
     generation_time: float,
+    progress: ProgressTracker,
 ) -> dict[str, Any]:
-    """Build result dictionary for a single audience."""
-    generated = []
-    failed_count = 0
+    """Build result dictionary from a list of validated (passing) members."""
+    generated = [m.model_dump() for m in members]
+    
+    total_screener_score = sum(m.screener_score for m in members)
+    total_parent_score = sum(m.parent_score for m in members)
+    total_attempts = sum(m.validation_attempt for m in members)
+    
+    count = len(members)
+    avg_screener = total_screener_score / count if count > 0 else 0.0
+    avg_parent = total_parent_score / count if count > 0 else 0.0
+    avg_attempts = total_attempts / count if count > 0 else 0.0
 
-    for i, result in enumerate(results):
-        if result:
-            generated.append(result.model_dump())
-        else:
-            generated.append(
-                {
-                    "member_id": f"AUD{audience_index}_{i + 1:04d}",
-                    "generation_error": "Failed to generate",
-                }
-            )
-            failed_count += 1
-
-    generated.sort(key=lambda m: m.get("member_id", ""))
+    stats = progress.get_stats()
 
     return {
         "generated_audience": generated,
         "metadata": {
             "audience_index": audience_index,
             "sample_size": audience_data.get("sampleSize", 0),
+            "actual_count": count,
             "persona": audience_data.get("persona", {}),
             "screener_questions": audience_data.get("screenerQuestions", []),
             "generation_stats": {
-                "total_members": len(results),
-                "successfully_generated": len(results) - failed_count,
-                "failed": failed_count,
+                "total_generated": count,
+                "all_validation_passed": True,  # Only passing members included
+                "total_attempts_made": stats.get("total_attempts", 0),
+                "total_passed": stats.get("passed", 0),
+                "total_failed": stats.get("failed", 0),
+                "avg_screener_score": round(avg_screener, 3),
+                "avg_parent_score": round(avg_parent, 3),
+                "avg_attempts_per_member": round(avg_attempts, 2),
             },
             "generation_time_seconds": round(generation_time, 2),
             "created_at": datetime.now(timezone.utc).isoformat(),
@@ -439,9 +563,11 @@ async def generate_audience_characteristics(
     audience_data: dict[str, Any],
     audience_index: int,
     max_concurrent: int = 10,
-) -> dict[str, Any]:
+) -> tuple[dict[str, Any], ProgressTracker]:
     """
     Generate characteristics for all members in a single audience.
+    
+    Guarantees exactly sampleSize PASSING members by regenerating failed ones.
 
     Args:
         client: AsyncAzureOpenAI client
@@ -451,25 +577,83 @@ async def generate_audience_characteristics(
         max_concurrent: Maximum number of concurrent API calls
 
     Returns:
-        Dictionary with generated_audience and metadata sections
+        Tuple of (result dictionary, progress tracker with stats)
     """
     start_time = time.time()
-    members = convert_audience_to_members(audience_data, audience_index)
+    sample_size = audience_data.get("sampleSize", 1)
+    persona_template = convert_persona_to_template(audience_data.get("persona", {}))
+    screener_questions = audience_data.get("screenerQuestions", [])
 
-    print(f"\nGenerating {len(members)} members for Audience {audience_index}...")
+    print(f"\nGenerating {sample_size} members for Audience {audience_index}...")
 
     semaphore = asyncio.Semaphore(max_concurrent)
-    progress = ProgressTracker(len(members))
+    progress = ProgressTracker(sample_size)
+    
+    # Collect passing members
+    passed_members: list[ValidatedMember] = []
+    member_counter = 0
+    generation_round = 0
+    
+    while len(passed_members) < sample_size and generation_round < MAX_GENERATION_ROUNDS:
+        generation_round += 1
+        needed = sample_size - len(passed_members)
+        
+        if generation_round > 1:
+            print(f"  Round {generation_round}: Need {needed} more passing members...")
+        
+        # Create members for this round
+        members_to_generate = []
+        for _ in range(needed):
+            member_counter += 1
+            members_to_generate.append({
+                "member_id": f"AUD{audience_index}_{member_counter:04d}",
+                "audience_index": audience_index,
+                "persona_template": persona_template,
+                "screener_responses": screener_questions,
+            })
+        
+        # Generate in parallel
+        tasks = [
+            _generate_with_semaphore(client, deployment, m, semaphore, progress)
+            for m in members_to_generate
+        ]
+        results = await asyncio.gather(*tasks)
+        
+        # Collect only passing members
+        for result in results:
+            if result and result.validation_passed:
+                passed_members.append(result)
+                if len(passed_members) >= sample_size:
+                    break
+    
+    # Check if we got enough
+    if len(passed_members) < sample_size:
+        print(f"  ⚠️ Warning: Only got {len(passed_members)}/{sample_size} passing members after {MAX_GENERATION_ROUNDS} rounds")
+    
+    # Renumber member IDs sequentially for clean output
+    final_members: list[ValidatedMember] = []
+    for idx, member in enumerate(passed_members[:sample_size]):
+        # Create new member with sequential ID
+        renumbered = ValidatedMember(
+            member_id=f"AUD{audience_index}_{idx + 1:04d}",
+            name=member.name,
+            about=member.about,
+            goals_and_motivations=member.goals_and_motivations,
+            frustrations=member.frustrations,
+            need_state=member.need_state,
+            occasions=member.occasions,
+            screener_score=member.screener_score,
+            parent_score=member.parent_score,
+            validation_passed=member.validation_passed,
+            validation_explanation=member.validation_explanation,
+            validation_attempt=member.validation_attempt
+        )
+        final_members.append(renumbered)
 
-    tasks = [
-        _generate_with_semaphore(client, deployment, m, semaphore, progress)
-        for m in members
-    ]
-    results = await asyncio.gather(*tasks)
-
-    return _build_audience_result(
-        audience_data, audience_index, list(results), time.time() - start_time
+    result = _build_audience_result_from_members(
+        audience_data, audience_index, final_members, time.time() - start_time, progress
     )
+    return result, progress
 
 
 async def generate_all_parallel(
@@ -477,46 +661,38 @@ async def generate_all_parallel(
     deployment: str,
     audiences: list[dict[str, Any]],
     max_concurrent: int = 10,
-) -> list[dict[str, Any]]:
+) -> tuple[list[dict[str, Any]], ProgressTracker]:
     """
-    Generate characteristics for ALL audiences in parallel.
-
-    Uses a single global semaphore to control total concurrent API calls.
+    Generate characteristics for ALL audiences.
+    
+    Each audience is processed to guarantee exactly sampleSize passing members.
+    
+    Returns:
+        Tuple of (list of audience results, combined progress tracker)
     """
     start_time = time.time()
+    total_samples = sum(aud.get("sampleSize", 0) for aud in audiences)
+    
+    print(f"\nGenerating {total_samples} members across {len(audiences)} audiences...")
+    print(f"(Will regenerate until each audience has exactly sampleSize passing members)")
 
-    # Flatten all members with audience tracking
-    all_members: list[dict[str, Any]] = []
-    ranges: list[tuple[int, int, int, dict[str, Any]]] = []
-
-    for idx, aud in enumerate(audiences):
-        members = convert_audience_to_members(aud, idx)
-        start_idx = len(all_members)
-        all_members.extend(members)
-        ranges.append((idx, start_idx, len(all_members), aud))
-
-    total = len(all_members)
-    print(f"\nGenerating {total} members across {len(audiences)} audiences...")
-
-    semaphore = asyncio.Semaphore(max_concurrent)
-    progress = ProgressTracker(total)
-
-    tasks = [
-        _generate_with_semaphore(client, deployment, m, semaphore, progress)
-        for m in all_members
-    ]
-    all_results = await asyncio.gather(*tasks)
-
-    # Group results by audience
+    # Process each audience (they handle their own retry logic)
     enriched = []
-    for idx, start_idx, end_idx, aud in ranges:
-        results = list(all_results[start_idx:end_idx])
-        enriched.append(
-            _build_audience_result(aud, idx, results, time.time() - start_time)
+    combined_progress = ProgressTracker(total_samples)
+    
+    for idx, aud in enumerate(audiences):
+        result, aud_progress = await generate_audience_characteristics(
+            client, deployment, aud, idx, max_concurrent
         )
+        enriched.append(result)
+        # Aggregate stats
+        combined_progress.passed += aud_progress.passed
+        combined_progress.failed += aud_progress.failed
+        combined_progress.total_attempts += aud_progress.total_attempts
+        combined_progress.completed += aud_progress.completed
 
     print(f"\nCompleted in {time.time() - start_time:.2f}s")
-    return enriched
+    return enriched, combined_progress
 
 
 async def run_generation_async(
@@ -555,27 +731,39 @@ async def run_generation_async(
     print(f"Total samples to generate: {total_samples}")
     print(f"Parallel mode: {parallel_mode}")
 
+    global_progress = None
+    
     if parallel_mode:
-        enriched_audiences = await generate_all_parallel(
+        enriched_audiences, global_progress = await generate_all_parallel(
             client, deployment, audiences, max_concurrent
         )
     else:
         # Sequential audiences with per-audience concurrency
         enriched_audiences = []
+        combined_progress = ProgressTracker(total_samples)
         for idx, audience_data in enumerate(audiences):
-            result = await generate_audience_characteristics(
+            result, aud_progress = await generate_audience_characteristics(
                 client, deployment, audience_data, idx, max_concurrent
             )
             enriched_audiences.append(result)
+            # Aggregate stats
+            combined_progress.passed += aud_progress.passed
+            combined_progress.failed += aud_progress.failed
+            combined_progress.total_attempts += aud_progress.total_attempts
+            combined_progress.completed += aud_progress.completed
+        global_progress = combined_progress
 
-    # Compile results
+    # Compile results - all members in output are passing
     total_generated = sum(
-        aud["metadata"]["generation_stats"]["successfully_generated"]
+        aud["metadata"]["generation_stats"]["total_generated"]
         for aud in enriched_audiences
     )
     total_failed = sum(
-        aud["metadata"]["generation_stats"]["failed"] for aud in enriched_audiences
+        aud["metadata"]["generation_stats"]["total_failed"] for aud in enriched_audiences
     )
+
+    # Get validation stats
+    validation_stats = global_progress.get_stats() if global_progress else {}
 
     results = {
         "project_name": data.get("projectName"),
@@ -589,6 +777,13 @@ async def run_generation_async(
         "total_members_processed": total_generated + total_failed,
         "total_successfully_generated": total_generated,
         "total_failed": total_failed,
+        "validation_summary": {
+            "passed": validation_stats.get("passed", 0),
+            "failed": validation_stats.get("failed", 0),
+            "pass_rate_percent": validation_stats.get("pass_rate", 0),
+            "avg_attempts_per_member": validation_stats.get("avg_attempts", 0),
+            "total_validation_attempts": validation_stats.get("total_attempts", 0),
+        },
         "audiences": enriched_audiences,
     }
 
@@ -633,6 +828,20 @@ def print_summary(results: dict[str, Any]) -> None:
     print(f"Total Members Processed: {results.get('total_members_processed')}")
     print(f"Successfully Generated: {results.get('total_successfully_generated')}")
     print(f"Failed: {results.get('total_failed')}")
+    
+    # Validation summary
+    val_summary = results.get("validation_summary", {})
+    if val_summary:
+        print("\n" + "-" * 60)
+        print("VALIDATION SUMMARY")
+        print("-" * 60)
+        passed = val_summary.get("passed", 0)
+        total = passed + val_summary.get("failed", 0)
+        pass_rate = val_summary.get("pass_rate_percent", 0)
+        avg_attempts = val_summary.get("avg_attempts_per_member", 0)
+        print(f"Passed: {passed}/{total} ({pass_rate}%)")
+        print(f"Average attempts per member: {avg_attempts}")
+    
     print("-" * 60)
 
     for aud in results.get("audiences", []):
@@ -640,9 +849,10 @@ def print_summary(results: dict[str, Any]) -> None:
         stats = metadata.get("generation_stats", {})
         print(f"\nAudience {metadata.get('audience_index')}:")
         print(f"  Persona: {metadata.get('persona', {}).get('personaName', 'N/A')}")
-        print(f"  Total Members: {stats.get('total_members', 0)}")
-        print(f"  Generated: {stats.get('successfully_generated', 0)}")
-        print(f"  Failed: {stats.get('failed', 0)}")
+        print(f"  Sample Size: {metadata.get('sample_size', 0)}")
+        print(f"  Generated (all passed): {stats.get('total_generated', 0)}")
+        print(f"  Avg Screener Score: {stats.get('avg_screener_score', 0)}")
+        print(f"  Avg Parent Score: {stats.get('avg_parent_score', 0)}")
 
         # Show a sample generated member
         generated_audience = aud.get("generated_audience", [])

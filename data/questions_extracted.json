@@ -1,0 +1,1283 @@
+{
+  "Screener": [
+    {
+      "id": "EMPLOY",
+      "text": "Which of the following best describes your employment status?",
+      "type": "checkbox",
+      "options": [
+        {
+          "value": "r1",
+          "text": "Employed full-time (30 hours per week or more)"
+        },
+        {
+          "value": "r2",
+          "text": "Employed part-time (less than 30 hours per week)"
+        },
+        {
+          "value": "r3",
+          "text": "Business owner / self-employed"
+        },
+        {
+          "value": "r4",
+          "text": "Contract or seasonal worker for one or multiple employers"
+        },
+        {
+          "value": "r5",
+          "text": "Student"
+        },
+        {
+          "value": "r6",
+          "text": "Unpaid homemaker/caregiver or parent"
+        },
+        {
+          "value": "r7",
+          "text": "Retired"
+        },
+        {
+          "value": "r8",
+          "text": "(Temporarily) unemployed"
+        },
+        {
+          "value": "r9",
+          "text": "Prefer not to say",
+          "exclusive": true
+        }
+      ],
+      "conditions": {
+        "qualification_logic": "To qualify for survey, r1, r2, or r3 (working full, part, or self-employed) must be selected."
+      },
+      "instructions": [
+        "Please select all that apply."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Screener"
+    },
+    {
+      "id": "COSIZE",
+      "text": "Including yourself, approximately how many full-time equivalent staff does your business employ across all locations in the US?",
+      "type": "radio",
+      "options": [
+        {
+          "value": "r1",
+          "text": "I am the sole owner / operator of my business"
+        },
+        {
+          "value": "r2",
+          "text": "2 to 4 employees"
+        },
+        {
+          "value": "r3",
+          "text": "5 to 9 employees"
+        },
+        {
+          "value": "r4",
+          "text": "10 to 19 employees"
+        },
+        {
+          "value": "r5",
+          "text": "20 to 99 employees"
+        },
+        {
+          "value": "r6",
+          "text": "100 to 199 employees"
+        },
+        {
+          "value": "r7",
+          "text": "200 to 499 employees"
+        },
+        {
+          "value": "r8",
+          "text": "500 to 999 employees"
+        },
+        {
+          "value": "r9",
+          "text": "1,000 to 4,999 employees"
+        },
+        {
+          "value": "r10",
+          "text": "5,000 to 9,999 employees"
+        },
+        {
+          "value": "r11",
+          "text": "10,000 or more employees"
+        },
+        {
+          "value": "r998",
+          "text": "Don't know"
+        }
+      ],
+      "conditions": {
+        "qualification_logic": "To qualify for survey, COSIZE=r6-11 (100+ employees) OR REVENUE=r5-r12 ($100m+ revenue)."
+      },
+      "instructions": [
+        "Please select one."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Screener"
+    },
+    {
+      "id": "REVENUE",
+      "text": "What was the total revenue of your business in 2024 across all locations in the US?",
+      "type": "radio",
+      "options": [
+        {
+          "value": "r1",
+          "text": "Under $1 million"
+        },
+        {
+          "value": "r2",
+          "text": "$1 million to under $10 million"
+        },
+        {
+          "value": "r3",
+          "text": "$10 million to under $50 million"
+        },
+        {
+          "value": "r4",
+          "text": "$50 million to under $100 million"
+        },
+        {
+          "value": "r5",
+          "text": "$100 million to under $250 million"
+        },
+        {
+          "value": "r6",
+          "text": "$250 million to under $500 million"
+        },
+        {
+          "value": "r7",
+          "text": "$500 million to under $1 billion"
+        },
+        {
+          "value": "r8",
+          "text": "$1 billion to under $5 billion"
+        },
+        {
+          "value": "r9",
+          "text": "$5 billion to under $10 billion"
+        },
+        {
+          "value": "r10",
+          "text": "$10 billion to under $50 billion"
+        },
+        {
+          "value": "r11",
+          "text": "$50 billion to under $100 billion"
+        },
+        {
+          "value": "r12",
+          "text": "$100 billion or more"
+        },
+        {
+          "value": "r998",
+          "text": "Don't know"
+        }
+      ],
+      "conditions": {
+        "qualification_logic": "To qualify for survey, COSIZE=r6-11 (100+ employees) OR REVENUE=r5-r12 ($100m+ revenue)."
+      },
+      "instructions": [
+        "Please select one. Your best estimate is fine."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Screener"
+    },
+    {
+      "id": "FUNCTION",
+      "text": "Which of the below financial responsibilities, if any, fall within the scope of your job?",
+      "type": "checkbox",
+      "options": [
+        {
+          "value": "r1",
+          "text": "Accounts Payable (AP)"
+        },
+        {
+          "value": "r2",
+          "text": "Accounts Receivable (AR)"
+        },
+        {
+          "value": "r3",
+          "text": "Cash Application"
+        },
+        {
+          "value": "r4",
+          "text": "Controls"
+        },
+        {
+          "value": "r5",
+          "text": "Credit & Collections"
+        },
+        {
+          "value": "r6",
+          "text": "Financial Reporting & Compliance"
+        },
+        {
+          "value": "r7",
+          "text": "Financial Systems Management"
+        },
+        {
+          "value": "r8",
+          "text": "Fixed Assets"
+        },
+        {
+          "value": "r9",
+          "text": "General Ledger (GL) Accounting"
+        },
+        {
+          "value": "r10",
+          "text": "Internal Audit"
+        },
+        {
+          "value": "r11",
+          "text": "Payroll"
+        },
+        {
+          "value": "r12",
+          "text": "Spend & Expense"
+        },
+        {
+          "value": "r13",
+          "text": "Tax"
+        },
+        {
+          "value": "r14",
+          "text": "Treasury"
+        },
+        {
+          "value": "r15",
+          "text": "Other finance function (Please specify): ____________"
+        },
+        {
+          "value": "r16",
+          "text": "None of the above",
+          "exclusive": true
+        }
+      ],
+      "conditions": {
+        "qualification_logic": "To qualify for survey, FUNCTION=r2, r3, r4, r5, or r14 (AR, Cash App, Controls, Credit & Collect., or Treasury) must be selected."
+      },
+      "instructions": [
+        "Please select all that apply.",
+        "Show in alphabetical order."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Screener"
+    },
+    {
+      "id": "ROLE",
+      "text": "Which of the following best describes your current role in your business?",
+      "type": "radio",
+      "options": [
+        {
+          "value": "r1",
+          "text": "Owner, Partner, CEO, Founder, President, or similar"
+        },
+        {
+          "value": "r2",
+          "text": "CFO or similar"
+        },
+        {
+          "value": "r3",
+          "text": "SVP of Treasury or similar"
+        },
+        {
+          "value": "r4",
+          "text": "VP of Treasury"
+        },
+        {
+          "value": "r5",
+          "text": "VP of Finance"
+        },
+        {
+          "value": "r6",
+          "text": "Controller"
+        },
+        {
+          "value": "r7",
+          "text": "Director of Accounts Receivable (AR)"
+        },
+        {
+          "value": "r8",
+          "text": "Director of Cash Applications"
+        },
+        {
+          "value": "r9",
+          "text": "Accounts Receivable (AR) Manager"
+        },
+        {
+          "value": "r10",
+          "text": "Manager of Cash Applications"
+        },
+        {
+          "value": "r11",
+          "text": "Other (Please specify): ____________"
+        }
+      ],
+      "conditions": {
+        "qualification_logic": "Flag r1-6 (Controller or VP or higher) as priority roles."
+      },
+      "instructions": [
+        "Please select one."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Screener"
+    },
+    {
+      "id": "DM",
+      "text": "To what extent are you involved in the decision-making process about the products and services your business uses for the following?",
+      "type": "grid",
+      "options": [
+        {
+          "value": "c1",
+          "text": "I have no say in the decision"
+        },
+        {
+          "value": "c2",
+          "text": "My opinion contributes to decision making"
+        },
+        {
+          "value": "c3",
+          "text": "I am one of the final decision makers"
+        },
+        {
+          "value": "c4",
+          "text": "Does not apply"
+        }
+      ],
+      "conditions": {
+        "qualification_logic": "To qualify for survey, either r2 or r3 must be c2 or c3 - decision making authority for AR or Cash Application."
+      },
+      "instructions": [
+        "Please select one per row."
+      ],
+      "comments": [
+        "Rows: Accounts Payable, Accounts Receivable, Cash Application, Spend & Expense."
+      ],
+      "required": false,
+      "category": "Screener"
+    },
+    {
+      "id": "FAMILIARITY",
+      "text": "How familiar are you with the following financial systems suppliers?",
+      "type": "grid",
+      "options": [
+        {
+          "value": "c1",
+          "text": "Never heard of it"
+        },
+        {
+          "value": "c2",
+          "text": "Heard of it"
+        },
+        {
+          "value": "c3",
+          "text": "Know the brand well; not currently using"
+        },
+        {
+          "value": "c4",
+          "text": "Current customer/user"
+        },
+        {
+          "value": "c5",
+          "text": "Employee"
+        }
+      ],
+      "conditions": {
+        "qualification_logic": "Terminate if either are true: HSAMPLE=r1 and FAMILIARITY r1=c1 (Never Heard of BILL) OR HSAMPLE=r1 and FAMILIARITY r2-r5 = c5 (employee of competitor)."
+      },
+      "instructions": [
+        "Please select one per row.",
+        "Randomize rows."
+      ],
+      "comments": [
+        "Rows: BILL, High Radius, Billtrust, BlackLine, Ramp."
+      ],
+      "required": false,
+      "category": "Screener"
+    }
+  ],
+  "Functional Profiling & Needs": [
+    {
+      "id": "AUTOMATION",
+      "text": "To what extent is your business’s cash application automated? Please choose the response that best describes your business’ approach.",
+      "type": "radio",
+      "options": [
+        {
+          "value": "r1",
+          "text": "Largely manual: Primarily through spreadsheets, manual inputs, from different data sources"
+        },
+        {
+          "value": "r2",
+          "text": "Partially automated: Some manual data handling with significant portions automated"
+        },
+        {
+          "value": "r3",
+          "text": "Fully integrated: Entirely within a software solution with automatic updates and data integration"
+        }
+      ],
+      "conditions": {},
+      "instructions": [
+        "Please select one."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Functional Profiling & Needs"
+    },
+    {
+      "id": "SYSTEMS",
+      "text": "Which software/tools does your company currently use for cash application?",
+      "type": "checkbox",
+      "options": [
+        {
+          "value": "r1",
+          "text": "BILL"
+        },
+        {
+          "value": "r2",
+          "text": "Billtrust"
+        },
+        {
+          "value": "r3",
+          "text": "BlackLine"
+        },
+        {
+          "value": "r4",
+          "text": "Dade Systems/Versapay"
+        },
+        {
+          "value": "r5",
+          "text": "Epicor"
+        },
+        {
+          "value": "r6",
+          "text": "Esker"
+        },
+        {
+          "value": "r7",
+          "text": "HighRadius"
+        },
+        {
+          "value": "r8",
+          "text": "Infor"
+        },
+        {
+          "value": "r9",
+          "text": "In-house solution"
+        },
+        {
+          "value": "r10",
+          "text": "Microsoft Dynamics 365"
+        },
+        {
+          "value": "r11",
+          "text": "Oracle"
+        },
+        {
+          "value": "r12",
+          "text": "SAP"
+        },
+        {
+          "value": "r13",
+          "text": "Workday"
+        },
+        {
+          "value": "r14",
+          "text": "No solution (all manual)",
+          "exclusive": true
+        },
+        {
+          "value": "r15",
+          "text": "Other, please specify: ____________",
+          "exclusive": true
+        }
+      ],
+      "conditions": {},
+      "instructions": [
+        "Please select all that apply.",
+        "Show in alphabetical order."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Functional Profiling & Needs"
+    },
+    {
+      "id": "3PARTY",
+      "text": "What third party payment aggregators or providers do your customers use to pay you?",
+      "type": "checkbox",
+      "options": [
+        {
+          "value": "r1",
+          "text": "Ariba"
+        },
+        {
+          "value": "r2",
+          "text": "AvidXchange"
+        },
+        {
+          "value": "r3",
+          "text": "Bank of America Merchant Services"
+        },
+        {
+          "value": "r4",
+          "text": "BILL"
+        },
+        {
+          "value": "r5",
+          "text": "Coupa"
+        },
+        {
+          "value": "r6",
+          "text": "Edenred Pay"
+        },
+        {
+          "value": "r7",
+          "text": "FastPay/AvidXchange"
+        },
+        {
+          "value": "r8",
+          "text": "JPMorgan Chase Payment Solutions"
+        },
+        {
+          "value": "r9",
+          "text": "PaymodeX"
+        },
+        {
+          "value": "r10",
+          "text": "SAP Concur"
+        },
+        {
+          "value": "r11",
+          "text": "Tipalti"
+        },
+        {
+          "value": "r12",
+          "text": "Other (Please specify): ____________"
+        },
+        {
+          "value": "r13",
+          "text": "None of these – we do not receive funds from third party payment providers.",
+          "exclusive": true
+        }
+      ],
+      "conditions": {},
+      "instructions": [
+        "Please select all that apply.",
+        "Show in alphabetical order."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Functional Profiling & Needs"
+    },
+    {
+      "id": "PAINPT_OE",
+      "text": "Are there any issues or concerns that you struggle with when it comes to cash application and collections systems or workflow?",
+      "type": "text",
+      "options": [],
+      "conditions": {},
+      "instructions": [
+        "Optional open end."
+      ],
+      "comments": [
+        "Option: Not sure/none come to mind."
+      ],
+      "required": false,
+      "category": "Functional Profiling & Needs"
+    }
+  ],
+  "Concept Test & Value Story": [
+    {
+      "id": "IMPRESSION",
+      "text": "What is your overall impression of this new reconciliation solution from BILL?",
+      "type": "text",
+      "options": [],
+      "conditions": {},
+      "instructions": [
+        "Optional open end."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Concept Test & Value Story"
+    },
+    {
+      "id": "FEATURES",
+      "text": "Now thinking only about the features this reconciliation solution would offer, which of these features is most valuable for your business?",
+      "type": "checkbox",
+      "options": [
+        {
+          "value": "r1",
+          "text": "Automated Delivery: Set preferences for automated payments and daily consolidated remittance to support your AR automation."
+        },
+        {
+          "value": "r2",
+          "text": "Bank Account Management: Set and manage multiple bank accounts for each of your entities, ensuring precise payment routing and accurate reconciliation across your entire organization."
+        },
+        {
+          "value": "r3",
+          "text": "Check Conversion: Convert checks to card or ACH to get paid faster and reduce DSO."
+        },
+        {
+          "value": "r4",
+          "text": "Custom reports: Create reports that can work with your cash application software or data pulled directly into your ERP."
+        },
+        {
+          "value": "r5",
+          "text": "Dedicated Support: White glove onboarding and support with a dedicated BILL strategic account manager, ensuring ongoing personalized care."
+        },
+        {
+          "value": "r6",
+          "text": "Enterprise Portal: A single place to see all payments, statuses, customers and paid invoices. Maintain control over your financial security by managing access, defining user roles, and restricting certain actions —like bank account changes. Includes configurable reporting capabilities and file delivery options."
+        },
+        {
+          "value": "r7",
+          "text": "Remittance File: Receive a file containing payments and remittance details from customers sent daily via email or SFTP."
+        },
+        {
+          "value": "r8",
+          "text": "Tailored Remittance: Customize remittance data fields to your systems."
+        },
+        {
+          "value": "r9",
+          "text": "Works with your automation & ERP: Seamlessly integrates into your existing systems to streamline payment and remittance workflows."
+        }
+      ],
+      "conditions": {},
+      "instructions": [
+        "Please select your top two features.",
+        "Randomize list."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Concept Test & Value Story"
+    },
+    {
+      "id": "WTP",
+      "text": "Based on everything you have just read about the new reconciliation solution from BILL, how likely is it that your business would purchase this solution if the price were right?",
+      "type": "radio",
+      "options": [
+        {
+          "value": "r1",
+          "text": "Extremely Unlikely"
+        },
+        {
+          "value": "r2",
+          "text": "Unlikely"
+        },
+        {
+          "value": "r3",
+          "text": "Neither Likely nor Unlikely"
+        },
+        {
+          "value": "r4",
+          "text": "Likely"
+        },
+        {
+          "value": "r5",
+          "text": "Extremely Likely"
+        }
+      ],
+      "conditions": {
+        "qualification_logic": "Show WTP_YES if WTP=r4-5 (likely or extremely likely). Show WTP_NO if WTP=r1-2 (unlikely or extremely unlikely)."
+      },
+      "instructions": [
+        "Please select one.",
+        "Randomize options."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Concept Test & Value Story"
+    },
+    {
+      "id": "WTP_YES",
+      "text": "You mentioned that you would be likely to purchase this solution. In a few words, please tell us the main reason you would be likely to purchase the new reconciliation solution from BILL.",
+      "type": "text",
+      "options": [],
+      "conditions": {
+        "qualification_logic": "Show if WTP=r4-5 (likely or extremely likely)."
+      },
+      "instructions": [
+        "Optional open end."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Concept Test & Value Story"
+    },
+    {
+      "id": "WTP_NO",
+      "text": "You mentioned that you would not be likely to purchase this solution. In a few words, please tell us the main reason you would not be likely to purchase the new reconciliation solution from BILL.",
+      "type": "text",
+      "options": [],
+      "conditions": {
+        "qualification_logic": "Show if WTP=r1-2 (unlikely or extremely unlikely)."
+      },
+      "instructions": [
+        "Optional open end."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Concept Test & Value Story"
+    },
+    {
+      "id": "BENEFIT_A",
+      "text": "Which of the benefits of the solution below, if any, are relevant to your business?",
+      "type": "checkbox",
+      "options": [
+        {
+          "value": "r1",
+          "text": "Reduce manual processes and streamline payment processing through automated delivery of payments and daily consolidated remittance files."
+        },
+        {
+          "value": "r2",
+          "text": "Receive a daily, consolidated remittance file containing all payment and remittance details from every customer, delivered via email or SFTP that works with your existing or future automation tools."
+        },
+        {
+          "value": "r3",
+          "text": "Save on the costs associated with manual remittance and improve analyst efficiency, empowering them to focus on initiatives that fuel business growth."
+        },
+        {
+          "value": "r4",
+          "text": "Minimize human error with a single consolidated file that matches payments and remittance advice, delivered automatically."
+        },
+        {
+          "value": "r5",
+          "text": "Get paid faster and reduce DSO by converting checks to ACH."
+        },
+        {
+          "value": "r6",
+          "text": "BILL gives you the flexibility to route payments, control when you get paid, and tailor remittance data to your systems."
+        },
+        {
+          "value": "r7",
+          "text": "Set and manage multiple bank accounts for each of your entities, ensuring precise payment routing and accurate reconciliation across your entire organization."
+        },
+        {
+          "value": "r8",
+          "text": "Little to no IT effort: Just confirm your bank accounts, your entities, and review the single remittance file — that’s it."
+        },
+        {
+          "value": "r9",
+          "text": "It’s not a software suite & long implementation. Just confirm your accounts and entities and customize your single remittance file. Go live in a matter of weeks, not months."
+        },
+        {
+          "value": "r10",
+          "text": "None of these",
+          "exclusive": true
+        }
+      ],
+      "conditions": {},
+      "instructions": [
+        "Please select all that apply.",
+        "Pipe randomly from list."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Concept Test & Value Story"
+    },
+    {
+      "id": "BENEFIT_B",
+      "text": "Below are some additional benefits. Which of these benefits of the solution, if any, are relevant to your business?",
+      "type": "checkbox",
+      "options": [
+        {
+          "value": "r1",
+          "text": "Reduce manual processes and streamline payment processing through automated delivery of payments and daily consolidated remittance files."
+        },
+        {
+          "value": "r2",
+          "text": "Receive a daily, consolidated remittance file containing all payment and remittance details from every customer, delivered via email or SFTP that works with your existing or future automation tools."
+        },
+        {
+          "value": "r3",
+          "text": "Save on the costs associated with manual remittance and improve analyst efficiency, empowering them to focus on initiatives that fuel business growth."
+        },
+        {
+          "value": "r4",
+          "text": "Minimize human error with a single consolidated file that matches payments and remittance advice, delivered automatically."
+        },
+        {
+          "value": "r5",
+          "text": "Get paid faster and reduce DSO by converting checks to ACH."
+        },
+        {
+          "value": "r6",
+          "text": "BILL gives you the flexibility to route payments, control when you get paid, and tailor remittance data to your systems."
+        },
+        {
+          "value": "r7",
+          "text": "Set and manage multiple bank accounts for each of your entities, ensuring precise payment routing and accurate reconciliation across your entire organization."
+        },
+        {
+          "value": "r8",
+          "text": "Little to no IT effort: Just confirm your bank accounts, your entities, and review the single remittance file — that’s it."
+        },
+        {
+          "value": "r9",
+          "text": "It’s not a software suite & long implementation. Just confirm your accounts and entities and customize your single remittance file. Go live in a matter of weeks, not months."
+        },
+        {
+          "value": "r10",
+          "text": "None of these",
+          "exclusive": true
+        }
+      ],
+      "conditions": {},
+      "instructions": [
+        "Please select all that apply.",
+        "Pipe randomly from list."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Concept Test & Value Story"
+    },
+    {
+      "id": "BENEFIT_RANK",
+      "text": "Below are the benefits you indicated are relevant to your business. Now please rank the benefits in terms of how appealing they are for your business, where 1 is MOST appealing, 2 is SECOND most appealing, and so on.",
+      "type": "grid",
+      "options": [],
+      "conditions": {
+        "qualification_logic": "Show if any rows selected at BENEFIT_A or BENEFIT_B."
+      },
+      "instructions": [
+        "Rank top 3.",
+        "Pipe any rows selected at BENEFIT_A or BENEFIT_B."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Concept Test & Value Story"
+    },
+    {
+      "id": "POSITION",
+      "text": "Next we will show you marketing messages that describe the solution and its benefits. For each message, please indicate if it’s appealing or not appealing for your business.",
+      "type": "grid",
+      "options": [
+        {
+          "value": "c1",
+          "text": "Yes - appealing"
+        },
+        {
+          "value": "c2",
+          "text": "No - not appealing"
+        }
+      ],
+      "conditions": {},
+      "instructions": [
+        "Select one for each.",
+        "Carousel - show one message at a time with two buttons.",
+        "Randomize."
+      ],
+      "comments": [
+        "Messages: SMB Efficiency, Complementary Tool, Quick & Lightweight, Difficult, Tedious Payments, Coverage Gap Filler."
+      ],
+      "required": false,
+      "category": "Concept Test & Value Story"
+    },
+    {
+      "id": "POS_RANK",
+      "text": "Below are messages you indicated are appealing for your business. Which of these is most appealing?",
+      "type": "radio",
+      "options": [],
+      "conditions": {
+        "qualification_logic": "Show if multiple rows selected 'Yes - appealing' at POSITION."
+      },
+      "instructions": [
+        "Pipe rows selected at POSITION."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Concept Test & Value Story"
+    },
+    {
+      "id": "POS_HILITE",
+      "text": "Below is the description you said was most appealing for your business. Please take a moment to highlight the words or phrases in the text below that felt persuasive or impactful to you.",
+      "type": "text",
+      "options": [],
+      "conditions": {
+        "qualification_logic": "Show if any row selected or autopunched at POS_RANK."
+      },
+      "instructions": [
+        "Pipe row selected at POSITION."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Concept Test & Value Story"
+    },
+    {
+      "id": "NAME",
+      "text": "Below are three names BILL is considering for the reconciliation solution. Please pick the name that you think best describes the solution.",
+      "type": "radio",
+      "options": [
+        {
+          "value": "r1",
+          "text": "FastMatch"
+        },
+        {
+          "value": "r2",
+          "text": "Consolidate"
+        },
+        {
+          "value": "r3",
+          "text": "PayMatch"
+        }
+      ],
+      "conditions": {},
+      "instructions": [
+        "Please select one.",
+        "Randomize."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Concept Test & Value Story"
+    }
+  ],
+  "Additional Profiling": [
+    {
+      "id": "INDUSTRY",
+      "text": "Which of the following describes the industry your business or organization is in?",
+      "type": "checkbox",
+      "options": [
+        {
+          "value": "r1",
+          "text": "Agriculture"
+        },
+        {
+          "value": "r2",
+          "text": "Automotive"
+        },
+        {
+          "value": "r3",
+          "text": "Banking, financial services & insurance"
+        },
+        {
+          "value": "r4",
+          "text": "Construction"
+        },
+        {
+          "value": "r5",
+          "text": "Consumer goods - food & beverage"
+        },
+        {
+          "value": "r6",
+          "text": "Consumer goods - all other (e.g., apparel, consumer electronics, beauty products)"
+        },
+        {
+          "value": "r7",
+          "text": "Corporate services (e.g., accounting, bookkeeping, consulting, staffing)"
+        },
+        {
+          "value": "r8",
+          "text": "Energy, utilities & mining"
+        },
+        {
+          "value": "r9",
+          "text": "Entertainment and Media (e.g., animation, film, music, broadcast)"
+        },
+        {
+          "value": "r10",
+          "text": "Information technology (Hardware, Software, Services, SaaS) - incl. B2B / B2C Tech"
+        },
+        {
+          "value": "r11",
+          "text": "Healthcare - medical devices, incl. electro medical"
+        },
+        {
+          "value": "r12",
+          "text": "Healthcare - all other (e.g., pharmaceuticals, provider, payer, veterinary)"
+        },
+        {
+          "value": "r13",
+          "text": "Legal Services"
+        },
+        {
+          "value": "r14",
+          "text": "Manufacturing"
+        },
+        {
+          "value": "r15",
+          "text": "Marketing and PR (incl. advertising, public relations, market research, publishing)"
+        },
+        {
+          "value": "r16",
+          "text": "Real estate"
+        },
+        {
+          "value": "r17",
+          "text": "Recreation & Travel (e.g., hospitality, tourism, restaurants, sports, gambling)"
+        },
+        {
+          "value": "r18",
+          "text": "Retail and eCommerce"
+        },
+        {
+          "value": "r19",
+          "text": "Transportation, Logistics"
+        },
+        {
+          "value": "r20",
+          "text": "Telecommunications (incl. mobile and cable TV / data)"
+        },
+        {
+          "value": "r21",
+          "text": "Other for profit, please specify: ____________",
+          "exclusive": true
+        },
+        {
+          "value": "r22",
+          "text": "Government"
+        },
+        {
+          "value": "r23",
+          "text": "Public Safety (e.g., law enforcement, military)"
+        },
+        {
+          "value": "r24",
+          "text": "Non-profit"
+        },
+        {
+          "value": "r25",
+          "text": "Religious Institutions"
+        },
+        {
+          "value": "r26",
+          "text": "Other non-profit/public, please specify: ____________",
+          "exclusive": true
+        }
+      ],
+      "conditions": {
+        "qualification_logic": "Flag Priority Industries r5, r11, r13, r19 (Consumer-Food Svcs, Healthcare-Med Devices, Legal Services, Transportation)."
+      },
+      "instructions": [
+        "Please select all that apply.",
+        "Show headers."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Additional Profiling"
+    },
+    {
+      "id": "ENTITY",
+      "text": "How many individual legal entities constitute your overall business structure?",
+      "type": "radio",
+      "options": [
+        {
+          "value": "r1",
+          "text": "1 entity"
+        },
+        {
+          "value": "r2",
+          "text": "2 to 9 entities"
+        },
+        {
+          "value": "r3",
+          "text": "10 or more entities"
+        },
+        {
+          "value": "r4",
+          "text": "Don’t know"
+        }
+      ],
+      "conditions": {},
+      "instructions": [
+        "Please select one."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Additional Profiling"
+    },
+    {
+      "id": "CUSTMIX",
+      "text": "Please think about all of your business’ customers. In terms of the total count of customers, what is the approximate percentage in each of the following categories?",
+      "type": "grid",
+      "options": [
+        {
+          "value": "r1",
+          "text": "None"
+        },
+        {
+          "value": "r2",
+          "text": "10%"
+        },
+        {
+          "value": "r3",
+          "text": "20%"
+        },
+        {
+          "value": "r4",
+          "text": "30%"
+        },
+        {
+          "value": "r5",
+          "text": "40%"
+        },
+        {
+          "value": "r6",
+          "text": "50%"
+        },
+        {
+          "value": "r7",
+          "text": "60%"
+        },
+        {
+          "value": "r8",
+          "text": "70%"
+        },
+        {
+          "value": "r9",
+          "text": "80%"
+        },
+        {
+          "value": "r10",
+          "text": "90%"
+        },
+        {
+          "value": "r11",
+          "text": "100%"
+        }
+      ],
+      "conditions": {},
+      "instructions": [
+        "Drop down; Must add up to 100%, allow 0%; show (dynamic) total sum to the respondents (on top or bottom of items)."
+      ],
+      "comments": [
+        "Rows: Consumers/Individuals, Small businesses, Mid-market, Enterprise."
+      ],
+      "required": false,
+      "category": "Additional Profiling"
+    },
+    {
+      "id": "ARMIX",
+      "text": "Approximately what percentage of your business’ invoices each month are paid via paper check, ACH, and other methods? Please think in terms of the total count of invoices.",
+      "type": "grid",
+      "options": [
+        {
+          "value": "r1",
+          "text": "0%/None"
+        },
+        {
+          "value": "r2",
+          "text": "10%"
+        },
+        {
+          "value": "r3",
+          "text": "20%"
+        },
+        {
+          "value": "r4",
+          "text": "30%"
+        },
+        {
+          "value": "r5",
+          "text": "40%"
+        },
+        {
+          "value": "r6",
+          "text": "50%"
+        },
+        {
+          "value": "r7",
+          "text": "60%"
+        },
+        {
+          "value": "r8",
+          "text": "70%"
+        },
+        {
+          "value": "r9",
+          "text": "80%"
+        },
+        {
+          "value": "r10",
+          "text": "90%"
+        },
+        {
+          "value": "r11",
+          "text": "100%"
+        }
+      ],
+      "conditions": {},
+      "instructions": [
+        "Drop down; Must add up to 100%, allow 0%; show (dynamic) total sum to the respondents (on top or bottom of items)."
+      ],
+      "comments": [
+        "Rows: Paper Checks, Bank transfer (ACH, Wire), Other methods."
+      ],
+      "required": false,
+      "category": "Additional Profiling"
+    },
+    {
+      "id": "DSO",
+      "text": "What is your business’ average Days Sales Outstanding (DSO)?",
+      "type": "number",
+      "options": [],
+      "conditions": {},
+      "instructions": [
+        "Please provide your best estimate."
+      ],
+      "comments": [
+        "Options: Open numeric, allow 0; Don’t know; Don't track DSO."
+      ],
+      "required": false,
+      "category": "Additional Profiling"
+    },
+    {
+      "id": "PERSONA",
+      "text": "Which of the following is a top priority for you in your role?",
+      "type": "checkbox",
+      "options": [
+        {
+          "value": "r1",
+          "text": "DSO: i.e. reducing DSO"
+        },
+        {
+          "value": "r2",
+          "text": "Costs: i.e. cost of outsourcing"
+        },
+        {
+          "value": "r3",
+          "text": "Closing books early"
+        },
+        {
+          "value": "r4",
+          "text": "All of the above",
+          "exclusive": true
+        },
+        {
+          "value": "r5",
+          "text": "None of the above",
+          "exclusive": true
+        }
+      ],
+      "conditions": {},
+      "instructions": [
+        "Select all that apply.",
+        "Randomize."
+      ],
+      "comments": [],
+      "required": false,
+      "category": "Additional Profiling"
+    },
+    {
+      "id": "EMAIL",
+      "text": "Thank you for your valuable feedback. Please provide your email address to receive the $20 e-gift card. Please note your email will be used only to contact you and provide your incentive if you are one of the first 100 fully completed responses.",
+      "type": "text",
+      "options": [],
+      "conditions": {
+        "qualification_logic": "Show if HSAMPLE=x (Internal)."
+      },
+      "instructions": [
+        "Mandatory open end."
+      ],
+      "comments": [],
+      "required": true,
+      "category": "Additional Profiling"
+    }
+  ],
+  "Main Survey": [],
+  "Demographics": [],
+  "Firmographics": [],
+  "Corpographics": [],
+  "Uncategorized": []
+}
