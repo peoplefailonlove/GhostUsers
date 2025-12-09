@@ -401,7 +401,8 @@ async def _compute_variation_score(
     """
     import re
     
-    prompt = f"""Compare these two personas and return ONLY a single number (0.0-1.0) representing how different the child is from the parent.
+    # The main client has response_format: json_object, so we ask for JSON
+    prompt = f"""Compare these two personas and return a JSON object with a single "score" field (0.0-1.0) representing how different the child is from the parent.
 0.0 = identical, 1.0 = completely different.
 
 Parent persona:
@@ -418,13 +419,20 @@ Child persona:
 - Need State: {child_member.get('need_state', '')}
 - Occasions: {child_member.get('occasions', '')}
 
-Return ONLY a number between 0.0 and 1.0."""
+Return ONLY a JSON object like: {{"score": 0.5}}"""
 
     try:
         messages = [HumanMessage(content=prompt)]
         response = await client.ainvoke(messages)
         score_str = str(response.content).strip()
-        # Extract number from response
+        # Parse JSON response
+        try:
+            data = json.loads(score_str)
+            if isinstance(data, dict) and "score" in data:
+                return min(1.0, max(0.0, float(data["score"])))
+        except json.JSONDecodeError:
+            pass
+        # Fallback: extract number from response
         match = re.search(r'\d+\.?\d*', score_str)
         if match:
             return min(1.0, max(0.0, float(match.group())))
