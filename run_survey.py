@@ -301,6 +301,68 @@ def build_messages(
     ]
 
 
+# ADDED FOR MVP: start - alignment check helper
+def _check_alignment_with_llm(
+    persona_json: Dict[str, Any],
+    answers_list: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """
+    Check if survey answers align with persona traits using LLM.
+    Returns dict with 'aligned' (bool) and 'reasons' (list of strings).
+    """
+    # Extract key traits
+    traits = {
+        "goals_and_motivations": persona_json.get("goals_and_motivations", []),
+        "frustrations": persona_json.get("frustrations", []),
+        "need_state": persona_json.get("need_state", ""),
+    }
+    
+    # If no traits, assume aligned
+    if not any(traits.values()):
+        return {"aligned": True, "reasons": []}
+    
+    # Build answers summary
+    answers_text = json.dumps(answers_list[:20], ensure_ascii=False)  # Limit for token efficiency
+    
+    prompt = f"""Analyze if these survey answers align with the persona's traits.
+
+Persona traits:
+- Goals & Motivations: {traits['goals_and_motivations']}
+- Frustrations: {traits['frustrations']}
+- Need State: {traits['need_state']}
+
+Survey answers (sample):
+{answers_text}
+
+Return ONLY a JSON object with:
+- "aligned": true/false
+- "reasons": list of strings explaining misalignments (empty if aligned)
+
+Example: {{"aligned": false, "reasons": ["Answer contradicts goal of X", "Missing frustration theme Y"]}}"""
+
+    try:
+        messages = [
+            {"role": "system", "content": "You are an alignment checker. Return only valid JSON."},
+            {"role": "user", "content": prompt},
+        ]
+        resp = client.chat.completions.create(
+            model=AZURE_OPENAI_DEPLOYMENT_5,
+            messages=messages,
+        )
+        content = resp.choices[0].message.content
+        if content:
+            result = json.loads(content)
+            return {
+                "aligned": result.get("aligned", True),
+                "reasons": result.get("reasons", []),
+            }
+    except Exception:
+        pass
+    
+    return {"aligned": True, "reasons": []}
+# ADDED FOR MVP: end - alignment check helper
+
+
 # =========================
 # Core: run survey for one persona
 # =========================
@@ -340,10 +402,15 @@ def answer_questions_for_persona(
         for q in questions
     ]
 
+    # ADDED FOR MVP: start - alignment check using LLM
+    alignment = _check_alignment_with_llm(persona_json, answers_list)
+    # ADDED FOR MVP: end
+
     return {
         "member_id": member_id,
         "audience_index": audience_index,
         "answers": answers_list,
+        "alignment": alignment,  # ADDED FOR MVP
     }
 
 

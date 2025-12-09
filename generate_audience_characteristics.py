@@ -390,20 +390,74 @@ async def _generate_with_semaphore(
             await progress.increment(result.member_id)
         return result
 
+def _compute_variation_score(
+    client: AzureChatOpenAI,
+    parent_persona: dict[str, Any],
+    child_member: dict[str, Any],
+) -> float:
+    """
+    Compute variation score between parent persona and child member using LLM.
+    Returns a float 0.0-1.0 representing probability of variation.
+    """
+    prompt = f"""Compare these two personas and return ONLY a single number (0.0-1.0) representing how different the child is from the parent.
+0.0 = identical, 1.0 = completely different.
+
+Parent persona:
+- About: {parent_persona.get('about', '')}
+- Goals: {parent_persona.get('goals_and_motivations', parent_persona.get('goalsAndMotivations', ''))}
+- Frustrations: {parent_persona.get('frustrations', '')}
+- Need State: {parent_persona.get('need_state', parent_persona.get('needState', ''))}
+- Occasions: {parent_persona.get('occasions', '')}
+
+Child persona:
+- About: {child_member.get('about', '')}
+- Goals: {child_member.get('goals_and_motivations', '')}
+- Frustrations: {child_member.get('frustrations', '')}
+- Need State: {child_member.get('need_state', '')}
+- Occasions: {child_member.get('occasions', '')}
+
+Return ONLY a number between 0.0 and 1.0."""
+
+    try:
+        messages = [HumanMessage(content=prompt)]
+        response = client.invoke(messages)
+        score_str = str(response.content).strip()
+        # Extract number from response
+        import re
+        match = re.search(r'\d+\.?\d*', score_str)
+        if match:
+            return min(1.0, max(0.0, float(match.group())))
+    except Exception:
+        pass
+    return 0.0
+
 
 def _build_audience_result(
     audience_data: dict[str, Any],
     audience_index: int,
     results: list[GeneratedMember | None],
     generation_time: float,
+    client: AzureChatOpenAI | None = None,  # ADDED FOR MVP: client param
 ) -> dict[str, Any]:
     """Build result dictionary for a single audience."""
     generated = []
     failed_count = 0
+    # ADDED FOR MVP: start - get parent persona for variation score
+    parent_persona = audience_data.get("persona", {})
+    # ADDED FOR MVP: end
 
     for i, result in enumerate(results):
         if result:
-            generated.append(result.model_dump())
+            member_dict = result.model_dump()
+            # ADDED FOR MVP: start - compute variation score
+            if client and parent_persona:
+                member_dict["variation_score"] = _compute_variation_score(
+                    client, parent_persona, member_dict
+                )
+            else:
+                member_dict["variation_score"] = 0.0
+            # ADDED FOR MVP: end
+            generated.append(member_dict)
         else:
             generated.append(
                 {
@@ -468,7 +522,7 @@ async def generate_audience_characteristics(
     results = await asyncio.gather(*tasks)
 
     return _build_audience_result(
-        audience_data, audience_index, list(results), time.time() - start_time
+        audience_data, audience_index, list(results), time.time() - start_time, client  # ADDED FOR MVP: pass client
     )
 
 
@@ -512,7 +566,7 @@ async def generate_all_parallel(
     for idx, start_idx, end_idx, aud in ranges:
         results = list(all_results[start_idx:end_idx])
         enriched.append(
-            _build_audience_result(aud, idx, results, time.time() - start_time)
+            _build_audience_result(aud, idx, results, time.time() - start_time, client)  # ADDED FOR MVP: pass client
         )
 
     print(f"\nCompleted in {time.time() - start_time:.2f}s")
