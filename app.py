@@ -441,14 +441,16 @@ def process_audience_generation_background(
             ]
             return await asyncio.gather(*tasks)
 
-        enriched_audiences = asyncio.run(run_generation())
+        results = asyncio.run(run_generation())
+        # Each result is a tuple of (audience_dict, progress_tracker)
+        enriched_audiences = [result[0] for result in results]
 
         total_generated = sum(
-            aud["metadata"]["generation_stats"]["successfully_generated"]
+            aud["metadata"]["generation_stats"]["total_generated"]
             for aud in enriched_audiences
         )
         total_failed = sum(
-            aud["metadata"]["generation_stats"]["failed"] for aud in enriched_audiences
+            aud["metadata"]["generation_stats"]["total_failed"] for aud in enriched_audiences
         )
 
         processing_time = time.time() - start_time
