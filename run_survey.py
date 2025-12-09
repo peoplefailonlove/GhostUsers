@@ -308,41 +308,53 @@ def _check_alignment_with_llm(
 ) -> Dict[str, Any]:
     """
     Check if survey answers align with persona traits using LLM.
-    Returns dict with 'aligned' (bool) and 'reasons' (list of strings).
+    Returns dict with 'aligned' (bool), 'score' (0.0-1.0), and 'reasons' (list of strings).
     """
-    # Extract key traits
+    # Extract key traits - include about for richer context
     traits = {
+        "about": persona_json.get("about", ""),
         "goals_and_motivations": persona_json.get("goals_and_motivations", []),
         "frustrations": persona_json.get("frustrations", []),
         "need_state": persona_json.get("need_state", ""),
+        "occasions": persona_json.get("occasions", ""),
     }
     
-    # If no traits, assume aligned
-    if not any(traits.values()):
-        return {"aligned": True, "reasons": []}
+    # If no meaningful traits, assume aligned
+    if not traits["about"] and not any([traits["goals_and_motivations"], traits["frustrations"], traits["need_state"]]):
+        return {"aligned": True, "score": 1.0, "reasons": []}
     
-    # Build answers summary
-    answers_text = json.dumps(answers_list[:20], ensure_ascii=False)  # Limit for token efficiency
+    # Build answers summary - use more answers for better analysis
+    answers_text = json.dumps(answers_list[:50], ensure_ascii=False)
     
-    prompt = f"""Analyze if these survey answers align with the persona's traits.
+    prompt = f"""Analyze if these survey answers align with the persona's unique traits and characteristics.
 
-Persona traits:
+Persona Profile:
+- About: {traits['about']}
 - Goals & Motivations: {traits['goals_and_motivations']}
 - Frustrations: {traits['frustrations']}
 - Need State: {traits['need_state']}
+- Occasions: {traits['occasions']}
 
-Survey answers (sample):
+Survey answers:
 {answers_text}
 
-Return ONLY a JSON object with:
-- "aligned": true/false
-- "reasons": list of strings explaining misalignments (empty if aligned)
+Analyze the alignment between the persona's unique characteristics and their survey responses.
+Consider:
+1. Do the answers reflect the persona's stated goals and motivations?
+2. Are the frustrations and pain points consistent with their responses?
+3. Does the overall tone match their need state?
+4. Are there any contradictions between who they are and how they answered?
 
-Example: {{"aligned": false, "reasons": ["Answer contradicts goal of X", "Missing frustration theme Y"]}}"""
+Return ONLY a JSON object with:
+- "aligned": true/false (true if mostly aligned, false if significant misalignments)
+- "score": a number 0.0-1.0 representing alignment degree (1.0 = perfect alignment)
+- "reasons": list of specific observations about alignment or misalignment
+
+Example: {{"aligned": true, "score": 0.85, "reasons": ["Answers reflect entrepreneurial mindset", "Response to Q5 slightly inconsistent with stated frustration"]}}"""
 
     try:
         messages = [
-            {"role": "system", "content": "You are an alignment checker. Return only valid JSON."},
+            {"role": "system", "content": "You are an expert alignment analyzer. Evaluate how well survey responses match persona characteristics. Return only valid JSON."},
             {"role": "user", "content": prompt},
         ]
         resp = client.chat.completions.create(
@@ -351,15 +363,27 @@ Example: {{"aligned": false, "reasons": ["Answer contradicts goal of X", "Missin
         )
         content = resp.choices[0].message.content
         if content:
-            result = json.loads(content)
+            # Try to extract JSON from response
+            try:
+                result = json.loads(content)
+            except json.JSONDecodeError:
+                # Try to extract JSON from markdown code block
+                import re
+                json_match = re.search(r'\{[^{}]*\}', content, re.DOTALL)
+                if json_match:
+                    result = json.loads(json_match.group())
+                else:
+                    raise
+            
             return {
                 "aligned": result.get("aligned", True),
+                "score": float(result.get("score", 1.0 if result.get("aligned", True) else 0.5)),
                 "reasons": result.get("reasons", []),
             }
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(f"Alignment check failed: {e}")
     
-    return {"aligned": True, "reasons": []}
+    return {"aligned": True, "score": 1.0, "reasons": ["Alignment check could not be performed"]}
 # ADDED FOR MVP: end - alignment check helper
 
 

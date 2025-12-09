@@ -390,15 +390,17 @@ async def _generate_with_semaphore(
             await progress.increment(result.member_id)
         return result
 
-def _compute_variation_score(
+async def _compute_variation_score(
     client: AzureChatOpenAI,
     parent_persona: dict[str, Any],
     child_member: dict[str, Any],
 ) -> float:
     """
     Compute variation score between parent persona and child member using LLM.
-    Returns a float 0.0-1.0 representing probability of variation.
+    Returns a float 0.0-1.0 representing degree of variation.
     """
+    import re
+    
     prompt = f"""Compare these two personas and return ONLY a single number (0.0-1.0) representing how different the child is from the parent.
 0.0 = identical, 1.0 = completely different.
 
@@ -420,43 +422,39 @@ Return ONLY a number between 0.0 and 1.0."""
 
     try:
         messages = [HumanMessage(content=prompt)]
-        response = client.invoke(messages)
+        response = await client.ainvoke(messages)
         score_str = str(response.content).strip()
         # Extract number from response
-        import re
         match = re.search(r'\d+\.?\d*', score_str)
         if match:
             return min(1.0, max(0.0, float(match.group())))
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"  Warning: Failed to compute variation score: {e}")
     return 0.0
 
 
-def _build_audience_result(
+async def _build_audience_result(
     audience_data: dict[str, Any],
     audience_index: int,
     results: list[GeneratedMember | None],
     generation_time: float,
-    client: AzureChatOpenAI | None = None,  # ADDED FOR MVP: client param
+    client: AzureChatOpenAI | None = None,
 ) -> dict[str, Any]:
     """Build result dictionary for a single audience."""
     generated = []
     failed_count = 0
-    # ADDED FOR MVP: start - get parent persona for variation score
     parent_persona = audience_data.get("persona", {})
-    # ADDED FOR MVP: end
 
     for i, result in enumerate(results):
         if result:
             member_dict = result.model_dump()
-            # ADDED FOR MVP: start - compute variation score
+            # Compute variation score asynchronously
             if client and parent_persona:
-                member_dict["variation_score"] = _compute_variation_score(
+                member_dict["variation_score"] = await _compute_variation_score(
                     client, parent_persona, member_dict
                 )
             else:
                 member_dict["variation_score"] = 0.0
-            # ADDED FOR MVP: end
             generated.append(member_dict)
         else:
             generated.append(
@@ -521,8 +519,8 @@ async def generate_audience_characteristics(
     ]
     results = await asyncio.gather(*tasks)
 
-    return _build_audience_result(
-        audience_data, audience_index, list(results), time.time() - start_time, client  # ADDED FOR MVP: pass client
+    return await _build_audience_result(
+        audience_data, audience_index, list(results), time.time() - start_time, client
     )
 
 
@@ -566,7 +564,7 @@ async def generate_all_parallel(
     for idx, start_idx, end_idx, aud in ranges:
         results = list(all_results[start_idx:end_idx])
         enriched.append(
-            _build_audience_result(aud, idx, results, time.time() - start_time, client)  # ADDED FOR MVP: pass client
+            await _build_audience_result(aud, idx, results, time.time() - start_time, client)
         )
 
     print(f"\nCompleted in {time.time() - start_time:.2f}s")
