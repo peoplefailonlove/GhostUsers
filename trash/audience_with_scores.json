@@ -1,0 +1,322 @@
+{
+  "project_name": "Test Bill_2",
+  "project_description": "Test Bill_2 desc",
+  "project_id": "113",
+  "user_id": "2",
+  "request_id": "REQ-71-1764925874854",
+  "json_file_url": "https://syncbillblob.blob.core.windows.net/json-output-container/survey_extracted_20251205T090739Z_72f09c81.json?se=2026-12-05T09%3A08%3A29Z&sp=r&sv=2025-11-05&sr=b&sig=ebehQr/EifindBvFbN8IvBnuD6x5SEOVR5MZp8F%2Bejs%3D",
+  "generation_model": "azure:gpt-4o",
+  "provider": "azure",
+  "total_audiences": 1,
+  "total_members_processed": 10,
+  "total_successfully_generated": 10,
+  "total_failed": 0,
+  "processing_time_seconds": 9.38,
+  "audiences": [
+    {
+      "generated_audience": [
+        {
+          "member_id": "AUD0_0001",
+          "name": "Elliot Carraway",
+          "about": "Elliot is a self-employed financial controller who oversees operations at his mid-sized technology consultancy based in Seattle, Washington. With over 15 years of experience in financial systems management and compliance, he is adept at implementing robust tools and workflows to optimize reporting and streamline processes. Elliot is deeply involved in strategic decision-making and contributes significantly to the choice of products and services his business adopts. Known for his meticulous approach, Elliot blends analytical precision with a collaborative leadership style that fosters trust and efficiency among his 150-member team. He is passionate about staying ahead in the financial technology space and frequently participates in webinars and conferences. Outside of work, Elliot enjoys hiking the Pacific Northwest trails and experimenting with artisanal coffee roasting, a hobby that keeps him grounded and creative.",
+          "goals_and_motivations": [
+            "To adopt advanced financial systems to improve reporting accuracy",
+            "To ensure compliance with evolving regulations while reducing inefficiencies",
+            "To support sustainable company growth through robust cash flow management"
+          ],
+          "frustrations": [
+            "Long onboarding timelines for new financial tools",
+            "Lack of seamless integration between existing systems",
+            "Balancing cost-effectiveness with the need for cutting-edge technology"
+          ],
+          "need_state": "Focused and strategic, seeking innovative solutions to drive operational excellence",
+          "occasions": "Engages with content during workday breaks for industry updates and after project audits to explore potential solutions",
+          "screener_score": 0.4997,
+          "parent_score": 0.5727,
+          "screener_passed": true,
+          "parent_passed": true,
+          "validation_passed": true
+        },
+        {
+          "member_id": "AUD0_0002",
+          "name": "Elsa Morretti",
+          "about": "Elsa Morretti is a part-time financial controller and the owner of a boutique consulting firm specializing in financial systems management and compliance for mid-sized tech companies across the US. Based in San Francisco, Elsa has built a strong reputation for her strategic thinking and ability to bring innovation into complex financial operations. Her business employs around 150 staff and generates over $1 billion in annual revenue, giving her robust experience in balancing operational efficiency with high-stakes financial reporting. Elsa is deeply involved in the decision-making process for adopting new financial software solutions, often researching and evaluating emerging systems to give her clients a competitive edge. Despite her demanding professional life, Elsa is committed to maintaining a balanced lifestyle; she practices yoga to unwind, enjoys exploring the Bay Area\u2019s art museums, and takes weekend hikes on scenic trails. She also mentors early-career professionals in finance, believing in the importance of passing on knowledge to help others succeed.",
+          "goals_and_motivations": [
+            "To optimize financial systems for her clients and increase operational efficiency",
+            "To maintain a steady cash flow to support the firm's growth trajectory",
+            "To foster an innovative and motivated team culture within her business"
+          ],
+          "frustrations": [
+            "Difficulty in efficiently implementing new financial software across diverse client teams",
+            "Challenges in reconciling payment delays and managing overdue accounts for clients",
+            "Balancing the needs of her employees with the demands of high-profile client projects"
+          ],
+          "need_state": "Eager to innovate while managing business growth responsibly",
+          "occasions": "Engages with content during research sessions for financial systems, quarterly revenue reviews, and team strategy meetings",
+          "screener_score": 0.4962,
+          "parent_score": 0.5782,
+          "screener_passed": true,
+          "parent_passed": true,
+          "validation_passed": true
+        },
+        {
+          "member_id": "AUD0_0003",
+          "name": "Liam Vartano",
+          "about": "Liam Vartano is a self-employed financial controller based in San Francisco who manages a mid-sized enterprise with approximately 150 employees and annual revenue between $1 billion and $5 billion. With a sharp eye for detail and a passion for financial systems management and compliance, Liam spends his days overseeing complex reporting workflows and ensuring the integrity of his company\u2019s financial operations. Though his role demands precision and an analytical mindset, Liam thrives on innovation and regularly explores cutting-edge tools to optimize processes. His part-time schedule allows him to dedicate energy toward mentoring aspiring finance professionals and contributing to community-driven initiatives. He enjoys exploring the Bay Area\u2019s vibrant art scene and coastal trails, blending professional ambition with personal fulfillment in his balanced lifestyle.",
+          "goals_and_motivations": [
+            "To ensure compliance with financial regulations while maintaining reporting accuracy",
+            "To implement forward-thinking financial systems that streamline operations",
+            "To build and sustain a team that aligns with his vision for innovation and excellence"
+          ],
+          "frustrations": [
+            "Adapting new systems without causing disruptions to current workflows",
+            "Managing the challenges of balancing fast-paced innovation with regulatory compliance",
+            "Delays in reporting due to inefficiencies in current financial tools"
+          ],
+          "need_state": "Focused on driving operational efficiency while fostering team collaboration",
+          "occasions": "Engages with financial content during strategic planning sessions and after evaluating system upgrades",
+          "screener_score": 0.4754,
+          "parent_score": 0.5663,
+          "screener_passed": true,
+          "parent_passed": true,
+          "validation_passed": true
+        },
+        {
+          "member_id": "AUD0_0004",
+          "name": "Elliott Varun Persaud",
+          "about": "Elliott is the entrepreneurial controller of a mid-sized technology consulting firm based in San Jose, California. With a strong foundation in financial systems management and compliance, he has built a reputation for precision and innovation in his field. His company employs around 150 staff across multiple US locations and generates over $1 billion in revenue annually. Elliott works part-time, devoting the remainder of his schedule to refining operations, mentoring his team, and researching cutting-edge solutions for financial optimization. A proponent of automation technology, he closely follows industry trends and suppliers, though his firm hasn't yet adopted many of them. Outside of work, Elliott enjoys hiking in the Redwood forests, practicing mindfulness, and hosting business workshops for local entrepreneurs. He values community engagement and continuous growth, and his leadership style is rooted in collaboration and empowerment.",
+          "goals_and_motivations": [
+            "To implement advanced financial systems that improve reporting efficiency",
+            "To foster a collaborative and high-performing finance team within his business",
+            "To achieve streamlined compliance processes without disrupting operations"
+          ],
+          "frustrations": [
+            "Challenges in integrating new financial technologies across the organization",
+            "Cash flow unpredictability due to delayed client payments",
+            "Managing compliance without overloading his part-time schedule"
+          ],
+          "need_state": "Focused on strategic improvements, seeking innovative yet practical solutions",
+          "occasions": "Engages with content during weekly financial systems reviews, monthly team strategy meetings, and while exploring new vendor partnerships",
+          "screener_score": 0.5484,
+          "parent_score": 0.6314,
+          "screener_passed": true,
+          "parent_passed": true,
+          "validation_passed": true
+        },
+        {
+          "member_id": "AUD0_0005",
+          "name": "Marcella Vandenberg",
+          "about": "Marcella Vandenberg is a self-employed financial controller based in San Francisco, where she manages a mid-sized team for her boutique consultancy firm specializing in financial systems management and compliance. With over 15 years of industry experience, she excels at optimizing financial processes and ensuring compliance with complex regulations, particularly for large-scale technology companies. Marcella is highly analytical yet approachable, with a knack for simplifying intricate financial systems for her clients. Her firm has an annual revenue of $1.3 billion, and she is proud to employ over 150 dedicated professionals across the US. Outside of work, Marcella is an avid gardener and enjoys experimenting with sustainable living practices. She often spends weekends hiking and discovering hidden nature trails in the Bay Area, which help her unwind and recharge. She frequently explores new financial tools but prefers thorough research before recommending them to clients or implementing changes in her own business workflow.",
+          "goals_and_motivations": [
+            "To optimize internal financial systems for scalability across multiple locations",
+            "To exceed compliance benchmarks for clients while maintaining operational efficiency",
+            "To identify cutting-edge tools for improving reporting accuracy and team productivity"
+          ],
+          "frustrations": [
+            "Lack of seamless integration between older financial systems and new technologies",
+            "High employee turnover impacting team cohesion and project timelines",
+            "Difficulty in predicting cash flow during economic fluctuations"
+          ],
+          "need_state": "Pragmatic and detail-oriented, seeking innovative tools to streamline workflows and drive operational growth",
+          "occasions": "Engages with content during early morning strategy planning and midday breaks for professional development",
+          "screener_score": 0.4571,
+          "parent_score": 0.5438,
+          "screener_passed": true,
+          "parent_passed": true,
+          "validation_passed": true
+        },
+        {
+          "member_id": "AUD0_0006",
+          "name": "Antonella Brice\u00f1o",
+          "about": "Antonella is a self-employed controller who manages the financial systems and compliance efforts for her mid-sized technology firm in Austin, Texas. With deep expertise in financial reporting and optimization, she oversees a team of 150 employees and drives annual revenue between $1 billion and $5 billion. Although she works part-time, her role demands high-level decision-making, particularly when evaluating technology solutions for her business. Antonella is passionate about implementing efficient financial systems and maintaining smooth operational workflows. Outside of her professional responsibilities, she enjoys gardening, attending local art exhibitions, and participating in community volunteering events. Her weekends are often spent exploring the local food scene or hiking in nearby nature reserves. Antonella values productivity but strongly believes in cultivating human connections within her team and the community.",
+          "goals_and_motivations": [
+            "To identify and implement robust financial systems that enhance reporting accuracy and compliance",
+            "To streamline workflows for greater operational efficiency across her team",
+            "To mentor her team in adopting innovative solutions and best practices"
+          ],
+          "frustrations": [
+            "The difficulty of finding financial systems tailored to mid-sized businesses",
+            "Challenges in onboarding and training staff on new technologies",
+            "Balancing her part-time schedule with the demands of managing a growing business"
+          ],
+          "need_state": "Focused on driving operational excellence while fostering team alignment",
+          "occasions": "Engages with content during team planning sessions, financial system evaluations, and long-term strategy meetings",
+          "screener_score": 0.5161,
+          "parent_score": 0.5909,
+          "screener_passed": true,
+          "parent_passed": true,
+          "validation_passed": true
+        },
+        {
+          "member_id": "AUD0_0007",
+          "name": "Linden Corbin",
+          "about": "Linden Corbin is a part-time Controller and the owner of a mid-sized enterprise specializing in tech-driven manufacturing solutions based in Austin, Texas. Managing financial systems and ensuring compliance are his key responsibilities, with a strong focus on optimizing processes to support his company\u2019s $1 billion+ revenue growth. Passionate about leveraging innovation, Linden frequently evaluates emerging technologies and vendors to enhance financial reporting and system efficiency. Balancing his entrepreneurial responsibilities, he spends his weekends kayaking on nearby lakes or exploring new cuisines at local food festivals. Linden is deeply committed to mentoring his team, fostering collaboration, and maintaining a relaxed yet productive work environment.",
+          "goals_and_motivations": [
+            "Streamline financial systems to reduce inefficiencies and errors",
+            "Expand the business while maintaining regulatory compliance",
+            "Evaluate and implement advanced solutions for financial reporting"
+          ],
+          "frustrations": [
+            "Long onboarding times for new financial tools across the team",
+            "Fluctuations in cash flow due to delayed project payments",
+            "Balancing strategic oversight with day-to-day financial management tasks"
+          ],
+          "need_state": "Focused and pragmatic, seeking scalable solutions for operational efficiency",
+          "occasions": "Engages with content during daily operational reviews, vendor evaluations, and after-hours research on emerging financial systems",
+          "screener_score": 0.518,
+          "parent_score": 0.5875,
+          "screener_passed": true,
+          "parent_passed": true,
+          "validation_passed": true
+        },
+        {
+          "member_id": "AUD0_0008",
+          "name": "Elliot Darnell",
+          "about": "Elliot Darnell is a part-time business owner and controller at a mid-sized company based in Denver, Colorado, with operations generating several billion dollars in revenue annually. With a background in financial systems management and compliance, Elliot is deeply invested in ensuring the company's financial operations are both precise and future-focused. He actively contributes to decision-making processes, particularly when evaluating new financial systems and technologies. Elliot enjoys balancing his professional life with personal interests, including hiking in the Rockies, experimenting with gourmet cooking, and participating in local business networking events. As someone who values efficiency and innovation, he is always exploring ways to streamline workflows without compromising team morale. In his downtime, he reads financial literature and practices mindfulness techniques to maintain focus and clarity.",
+          "goals_and_motivations": [
+            "To enhance financial reporting accuracy and compliance",
+            "To adopt advanced financial systems and automation solutions",
+            "To create a sustainable and motivated work environment"
+          ],
+          "frustrations": [
+            "Limited bandwidth for implementing new technologies effectively",
+            "Challenges in reconciling complex financial data across multiple systems",
+            "Maintaining cash flow consistency during periods of market volatility"
+          ],
+          "need_state": "Focused on operational refinement, seeking practical tools and efficient strategies",
+          "occasions": "Engages with content during early morning research sessions or after business hours while planning new initiatives",
+          "screener_score": 0.5163,
+          "parent_score": 0.5988,
+          "screener_passed": true,
+          "parent_passed": true,
+          "validation_passed": true
+        },
+        {
+          "member_id": "AUD0_0009",
+          "name": "Lachlan Braddock",
+          "about": "Lachlan is a detail-oriented financial controller who runs a mid-sized business specializing in innovative software solutions based in Seattle, Washington. As the owner and lead financial strategist of a company employing over 150 staff and generating billions in revenue, he thrives on ensuring financial systems are optimized and compliant with industry standards. Part-time employment allows Lachlan to dedicate substantial energy to refining his company's financial reporting and systems management while carving out space for his entrepreneurial pursuits. He is deeply familiar with prominent financial systems suppliers, actively evaluating the best options to streamline operations. Outside of work, Lachlan is a nature enthusiast who enjoys hiking in the Pacific Northwest and photographing its breathtaking landscapes. He values work-life balance and is passionate about mentoring young professionals in finance and entrepreneurship.",
+          "goals_and_motivations": [
+            "To implement innovative financial systems for smoother operations",
+            "To ensure compliance and accuracy in financial reporting",
+            "To scale the business sustainably while maintaining profitability"
+          ],
+          "frustrations": [
+            "Difficulty finding a financial system that aligns perfectly with business needs",
+            "Challenges in adapting team workflows to new technologies",
+            "Managing cash flow fluctuations during high-growth phases"
+          ],
+          "need_state": "Focused but seeking reliable systems to enhance efficiency and drive growth",
+          "occasions": "Engages with content during financial planning sessions, quarterly audits, and while researching system upgrades",
+          "screener_score": 0.5491,
+          "parent_score": 0.6344,
+          "screener_passed": true,
+          "parent_passed": true,
+          "validation_passed": true
+        },
+        {
+          "member_id": "AUD0_0010",
+          "name": "Elliot Grayson",
+          "about": "Elliot Grayson is the Controller of a mid-sized technology and consulting firm based in San Francisco. With over 15 years of experience in financial systems management and compliance, Elliot is deeply involved in optimizing complex business operations. As a part-time employee and self-employed consultant, he balances his corporate role with his entrepreneurial pursuits, offering financial guidance to budding startups. His firm employs over 150 staff across the U.S. and boasts impressive annual revenues between $1 billion and $5 billion. Elliot is known for his methodical approach to streamlining financial processes, particularly in leveraging emerging technologies for reporting and compliance. Outside of work, he enjoys hiking in the Bay Area, experimenting with artisan coffee brewing, and volunteering as a mentor for aspiring fintech professionals. Elliot is always on the lookout for innovative financial systems that align with his firm's ambitious growth goals while maintaining a keen interest in user-friendly automation tools that simplify workflows.",
+          "goals_and_motivations": [
+            "To implement top-tier financial systems that enhance reporting accuracy and compliance",
+            "To optimize operational workflows without overburdening his growing team",
+            "To balance his career responsibilities with his personal entrepreneurial projects"
+          ],
+          "frustrations": [
+            "Challenges in encouraging team adoption of new financial technologies",
+            "Balancing the dual priorities of cash flow optimization and compliance requirements",
+            "Limited time to explore and implement advanced tools due to his part-time schedule"
+          ],
+          "need_state": "Focused and inquisitive, seeking reliable solutions to enhance financial systems and workflows",
+          "occasions": "Engages with content during software research sessions, routine compliance audits, and while planning team-wide reporting improvements",
+          "screener_score": 0.5095,
+          "parent_score": 0.6145,
+          "screener_passed": true,
+          "parent_passed": true,
+          "validation_passed": true
+        }
+      ],
+      "metadata": {
+        "audience_index": 0,
+        "sample_size": 10,
+        "persona": {
+          "id": 222,
+          "generatedTitle": "Top-Tier AR Director Focused on Innovation",
+          "personaName": "Bradley Thompson",
+          "age": 52,
+          "location": "Downtown San Francisco, California",
+          "ethnicity": "White",
+          "gender": "Male",
+          "personaType": "Accounts Receivable Department Director",
+          "about": "Bradley Thompson is a seasoned financial professional who oversees the entire Accounts Receivable (AR) department at a major technology company in San Francisco. With over 20 years of experience, Bradley is known for his leadership, expertise in financial optimization, and passionate dedication to his team. A firm believer in innovation, he actively adopts cutting-edge automation technology to streamline AR processes and achieve his KPIs. Outside of work, Bradley enjoys practicing yoga and mentoring rising professionals in the finance field. He values a balanced lifestyle and frequently spends weekends exploring the cultural and natural attractions around the Bay Area.",
+          "goalsAndMotivations": "Improve collection rates and meet Days Sales Outstanding (DSO) targets., Optimize cash flow to support corporate growth initiatives., Implement advanced automation solutions for AR processes., Foster a motivated, high-performing team.",
+          "frustrations": "Delays in reconciling payments and inefficiencies in AR processes., Difficulty in implementing new technologies quickly across large teams., Cash flow fluctuations due to overdue accounts., Balancing operational demands with the needs of his team.",
+          "needState": "Seeking tools and strategies to boost AR efficiency and maintain a motivated team.",
+          "occasions": "Daily oversight of AR metrics, quarterly reviews of cash flow targets, and whenever new technology solutions are introduced.",
+          "image": "https://blobvirtualpersona.blob.core.windows.net/personaimgs/persona_dbbabb72-0b02-4529-89b2-d7bed739f1be_20251204114648.png?se=2030-12-03T11%3A46%3A49Z&sp=r&sv=2025-07-05&sr=b&sig=hq/z2VLRZCzhDUy5zHRdJnm18akIsBpe78YKggWvjAI%3D",
+          "userId": 38,
+          "createdAt": "2025-12-04T11:00:39.572321",
+          "projectName": "Test Finance ",
+          "projectId": 140,
+          "country": "United States",
+          "domain": "Finance",
+          "category": "Financial Payment Platform",
+          "animationUrl": ""
+        },
+        "screener_questions": [
+          {
+            "question": "Which of the following best describes your employment status?",
+            "answer": [
+              "Employed part-time (less than 30 hours per week)",
+              "Business owner / self-employed"
+            ]
+          },
+          {
+            "question": "Including yourself, approximately how many full-time equivalent staff does your business employ across all locations in the US?",
+            "answer": [
+              "100 to 199 employees"
+            ]
+          },
+          {
+            "question": "What was the total revenue of your business in 2024 across all locations in the US?",
+            "answer": [
+              "$1 billion to under $5 billion"
+            ]
+          },
+          {
+            "question": "Which of the below financial responsibilities, if any, fall within the scope of your job?",
+            "answer": [
+              "Financial Systems Management",
+              "Financial Reporting & Compliance"
+            ]
+          },
+          {
+            "question": "Which of the following best describes your current role in your business?",
+            "answer": [
+              "Controller"
+            ]
+          },
+          {
+            "question": "To what extent are you involved in the decision-making process about the products and services your business uses for the following?",
+            "answer": [
+              "My opinion contributes to decision making"
+            ]
+          },
+          {
+            "question": "How familiar are you with the following financial systems suppliers?",
+            "answer": [
+              "Know the brand well; not currently using"
+            ]
+          }
+        ],
+        "generation_stats": {
+          "total_members": 10,
+          "successfully_generated": 10,
+          "failed": 0
+        },
+        "generation_time_seconds": 9.31,
+        "created_at": "2025-12-05T09:11:24.761386+00:00"
+      }
+    }
+  ]
+}

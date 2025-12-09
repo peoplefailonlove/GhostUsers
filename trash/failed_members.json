@@ -1,0 +1,52 @@
+[
+  {
+    "member_id": "AUD0_0001",
+    "screener_score": 0.4996,
+    "parent_score": 0.5727
+  },
+  {
+    "member_id": "AUD0_0002",
+    "screener_score": 0.4962,
+    "parent_score": 0.5782
+  },
+  {
+    "member_id": "AUD0_0003",
+    "screener_score": 0.4754,
+    "parent_score": 0.5663
+  },
+  {
+    "member_id": "AUD0_0004",
+    "screener_score": 0.5484,
+    "parent_score": 0.6314
+  },
+  {
+    "member_id": "AUD0_0005",
+    "screener_score": 0.4571,
+    "parent_score": 0.5438
+  },
+  {
+    "member_id": "AUD0_0006",
+    "screener_score": 0.5161,
+    "parent_score": 0.5909
+  },
+  {
+    "member_id": "AUD0_0007",
+    "screener_score": 0.518,
+    "parent_score": 0.5875
+  },
+  {
+    "member_id": "AUD0_0008",
+    "screener_score": 0.5163,
+    "parent_score": 0.5988
+  },
+  {
+    "member_id": "AUD0_0009",
+    "screener_score": 0.549,
+    "parent_score": 0.6343
+  },
+  {
+    "member_id": "AUD0_0010",
+    "screener_score": 0.5099,
+    "parent_score": 0.6147
+  }
+]
