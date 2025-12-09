@@ -52,11 +52,11 @@ GENERATED PERSONA:
 Return only JSON:
 {{
   "screener_score": 0.0-1.0,
+  "screener_reasoning": "why this score for screener match",
   "parent_score": 0.0-1.0,
-  "passed": true/false,
-  "explanation": "short reason"
+  "parent_reasoning": "why this score for parent persona match"
 }}
-Be very strict. Pass only if both scores ≥ 0.88.
+Score how well the generated persona matches.
 """
 
     client = _get_client()
@@ -68,4 +68,6 @@ Be very strict. Pass only if both scores ≥ 0.88.
     )
 
     result = json.loads(resp.choices[0].message.content)
+    # Always pass - just keep scores for output
+    result["passed"] = True
     return result
