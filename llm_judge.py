@@ -4,11 +4,14 @@ from openai import AsyncAzureOpenAI
 import os
 import json
 
-client = AsyncAzureOpenAI(
-    azure_endpoint="https://syncbillopenai.openai.azure.com/",
-    api_key=os.getenv("AZURE_OPENAI_KEY"),
-    api_version="2024-12-01-preview",
-)
+
+def _get_client() -> AsyncAzureOpenAI:
+    """Create Azure OpenAI async client using environment variables."""
+    return AsyncAzureOpenAI(
+        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+        api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+        api_version=os.getenv("OPENAI_API_VERSION", "2024-08-01-preview"),
+    )
 
 
 async def check_persona(parent: dict, screener_answers: list, generated: dict) -> dict:
@@ -56,6 +59,7 @@ Return only JSON:
 Be very strict. Pass only if both scores ≥ 0.88.
 """
 
+    client = _get_client()
     resp = await client.chat.completions.create(
         model="gpt-4o-mini",
         temperature=0,
